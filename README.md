@@ -11,7 +11,7 @@ they already have.
 
 - `/codex:review` for a normal read-only Codex review
 - `/codex:adversarial-review` for a steerable challenge review
-- `/codex:rescue`, `/codex:status`, `/codex:result`, and `/codex:cancel` to delegate work and manage background jobs
+- `/codex:execute`, `/codex:status`, `/codex:result`, and `/codex:cancel` to delegate work and manage background jobs
 
 ## Requirements
 
@@ -62,7 +62,7 @@ If Codex is installed but not logged in yet, run:
 After install, you should see:
 
 - the slash commands listed below
-- the `codex:codex-rescue` subagent in `/agents`
+- the `codex:codex-execute` subagent in `/agents`
 
 One simple first run is:
 
@@ -123,31 +123,29 @@ Examples:
 
 This command is read-only. It does not fix code.
 
-### `/codex:rescue`
+### `/codex:execute`
 
-Hands a task to Codex through the `codex:codex-rescue` subagent.
+Hands a task to Codex through the `codex:codex-execute` subagent. Runs in YOLO mode (full sandbox access) with GPT 5.4 at xhigh reasoning.
 
 Use it when you want Codex to:
 
 - investigate a bug
 - try a fix
 - continue a previous Codex task
-- take a faster or cheaper pass with a smaller model
+- implement a feature or refactor
 
 > [!NOTE]
-> Depending on the task and the model you choose these tasks might take a long time and it's generally recommended to force the task to be in the background or move the agent to the background.
+> Depending on the task these jobs might take a long time and it's generally recommended to force the task to be in the background or move the agent to the background.
 
-It supports `--background`, `--wait`, `--resume`, and `--fresh`. If you omit `--resume` and `--fresh`, the plugin can offer to continue the latest rescue thread for this repo.
+It supports `--background`, `--wait`, `--resume`, and `--fresh`. If you omit `--resume` and `--fresh`, the plugin can offer to continue the latest execute thread for this repo.
 
 Examples:
 
 ```bash
-/codex:rescue investigate why the tests started failing
-/codex:rescue fix the failing test with the smallest safe patch
-/codex:rescue --resume apply the top fix from the last run
-/codex:rescue --model gpt-5.4-mini --effort medium investigate the flaky integration test
-/codex:rescue --model spark fix the issue quickly
-/codex:rescue --background investigate the regression
+/codex:execute investigate why the tests started failing
+/codex:execute fix the failing test with the smallest safe patch
+/codex:execute --resume apply the top fix from the last run
+/codex:execute --background investigate the regression
 ```
 
 You can also just ask for a task to be delegated to Codex:
@@ -158,9 +156,9 @@ Ask Codex to redesign the database connection to be more resilient.
 
 **Notes:**
 
-- if you do not pass `--model` or `--effort`, Codex chooses its own defaults.
-- if you say `spark`, the plugin maps that to `gpt-5.3-codex-spark`
-- follow-up rescue requests can continue the latest Codex task in the repo
+- model is always GPT 5.4, effort is always xhigh - no flags needed
+- sandbox runs in YOLO mode (danger-full-access) - full read/write/exec access
+- follow-up execute requests can continue the latest Codex task in the repo
 
 ### `/codex:status`
 
@@ -221,6 +219,19 @@ When the review gate is enabled, the plugin uses a `Stop` hook to run a targeted
 > [!WARNING]
 > The review gate can create a long-running Claude/Codex loop and may drain usage limits quickly. Only enable it when you plan to actively monitor the session.
 
+### `/codex:dual-review`
+
+Runs a dual review where both Codex (GPT 5.4 xhigh) and Claude Opus independently review changes, then presents a synthesis with consensus findings, disagreements, and a verdict.
+
+Examples:
+
+```bash
+/codex:dual-review
+/codex:dual-review --base main
+```
+
+This command is read-only. It does not fix code. Both reviewers must agree for an APPROVED verdict.
+
 ## Typical Flows
 
 ### Review Before Shipping
@@ -232,14 +243,14 @@ When the review gate is enabled, the plugin uses a `Stop` hook to run a targeted
 ### Hand A Problem To Codex
 
 ```bash
-/codex:rescue investigate why the build is failing in CI
+/codex:execute investigate why the build is failing in CI
 ```
 
 ### Start Something Long-Running
 
 ```bash
 /codex:adversarial-review --background
-/codex:rescue --background investigate the flaky test
+/codex:execute --background investigate the flaky test
 ```
 
 Then check in with:
@@ -255,12 +266,7 @@ The Codex plugin wraps the [Codex app server](https://developers.openai.com/code
 
 ### Common Configurations
 
-If you want to change the default reasoning effort or the default model that gets used by the plugin, you can define that inside your user-level or project-level `config.toml`. For example to always use `gpt-5.4-mini` on `high` for a specific project you can add the following to a `.codex/config.toml` file at the root of the directory you started Claude in:
-
-```toml
-model = "gpt-5.4-mini"
-model_reasoning_effort = "high"
-```
+This fork forces GPT 5.4 at xhigh reasoning for all execute tasks. Model and effort flags are not available. Web search is always enabled (`live` mode, `high` context) per-thread. You can still configure other Codex options in your `config.toml`.
 
 Your configuration will be picked up based on:
 

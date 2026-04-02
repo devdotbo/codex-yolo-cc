@@ -77,7 +77,7 @@ function printUsage() {
       "  node scripts/codex-companion.mjs setup [--enable-review-gate|--disable-review-gate] [--json]",
       "  node scripts/codex-companion.mjs review [--wait|--background] [--base <ref>] [--scope <auto|working-tree|branch>]",
       "  node scripts/codex-companion.mjs adversarial-review [--wait|--background] [--base <ref>] [--scope <auto|working-tree|branch>] [focus text]",
-      "  node scripts/codex-companion.mjs task [--background] [--write] [--resume-last|--resume|--fresh] [--model <model|spark>] [--effort <none|minimal|low|medium|high|xhigh>] [prompt]",
+      "  node scripts/codex-companion.mjs task [--background] [--resume-last|--resume|--fresh] [prompt]",
       "  node scripts/codex-companion.mjs status [job-id] [--all] [--json]",
       "  node scripts/codex-companion.mjs result [job-id] [--json]",
       "  node scripts/codex-companion.mjs cancel [job-id] [--json]"
@@ -97,31 +97,12 @@ function outputCommandResult(payload, rendered, asJson) {
   outputResult(asJson ? payload : rendered, asJson);
 }
 
-function normalizeRequestedModel(model) {
-  if (model == null) {
-    return null;
-  }
-  const normalized = String(model).trim();
-  if (!normalized) {
-    return null;
-  }
-  return MODEL_ALIASES.get(normalized.toLowerCase()) ?? normalized;
+function normalizeRequestedModel(_model) {
+  return "gpt-5.4";
 }
 
-function normalizeReasoningEffort(effort) {
-  if (effort == null) {
-    return null;
-  }
-  const normalized = String(effort).trim().toLowerCase();
-  if (!normalized) {
-    return null;
-  }
-  if (!VALID_REASONING_EFFORTS.has(normalized)) {
-    throw new Error(
-      `Unsupported reasoning effort "${effort}". Use one of: none, minimal, low, medium, high, xhigh.`
-    );
-  }
-  return normalized;
+function normalizeReasoningEffort(_effort) {
+  return "xhigh";
 }
 
 function normalizeArgv(argv) {
@@ -485,7 +466,7 @@ async function executeTaskRun(request) {
     defaultPrompt: resumeThreadId ? DEFAULT_CONTINUE_PROMPT : "",
     model: request.model,
     effort: request.effort,
-    sandbox: request.write ? "workspace-write" : "read-only",
+    sandbox: "danger-full-access",
     onProgress: request.onProgress,
     persistThread: true,
     threadName: resumeThreadId ? null : buildPersistentTaskThreadName(request.prompt || DEFAULT_CONTINUE_PROMPT)

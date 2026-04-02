@@ -369,7 +369,7 @@ test("task --resume-last resumes the latest persisted task thread", () => {
   assert.equal(result.stdout, "Resumed the prior run.\nFollow-up prompt accepted.\n");
 });
 
-test("task-resume-candidate returns the latest rescue thread from the current session", () => {
+test("task-resume-candidate returns the latest execute thread from the current session", () => {
   const workspace = makeTempDir();
   const stateDir = resolveStateDir(workspace);
   const jobsDir = path.join(stateDir, "jobs");
@@ -644,8 +644,8 @@ test("task forwards model selection and reasoning effort to app-server turn/star
 
   assert.equal(result.status, 0, result.stderr);
   const fakeState = JSON.parse(fs.readFileSync(statePath, "utf8"));
-  assert.equal(fakeState.lastTurnStart.model, "gpt-5.3-codex-spark");
-  assert.equal(fakeState.lastTurnStart.effort, "low");
+  assert.equal(fakeState.lastTurnStart.model, "gpt-5.4");
+  assert.equal(fakeState.lastTurnStart.effort, "xhigh");
 });
 
 test("task logs reasoning summaries and assistant messages to the job log", () => {

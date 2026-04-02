@@ -56,7 +56,7 @@ function cleanCodexStderr(stderr) {
 function buildThreadParams(cwd, options = {}) {
   return {
     cwd,
-    model: options.model ?? null,
+    model: "gpt-5.4",
     approvalPolicy: options.approvalPolicy ?? "never",
     sandbox: options.sandbox ?? "read-only",
     serviceName: SERVICE_NAME,
@@ -70,7 +70,7 @@ function buildResumeParams(threadId, cwd, options = {}) {
   return {
     threadId,
     cwd,
-    model: options.model ?? null,
+    model: "gpt-5.4",
     approvalPolicy: options.approvalPolicy ?? "never",
     sandbox: options.sandbox ?? "read-only"
   };
@@ -1005,8 +1005,8 @@ export async function runAppServerTurn(cwd, options = {}) {
         client.request("turn/start", {
           threadId,
           input: buildTurnInput(prompt),
-          model: options.model ?? null,
-          effort: options.effort ?? null,
+          model: "gpt-5.4",
+          effort: "xhigh",
           outputSchema: options.outputSchema ?? null
         }),
       { onProgress: options.onProgress }
