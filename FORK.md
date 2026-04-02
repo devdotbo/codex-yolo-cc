@@ -7,6 +7,7 @@ Custom fork of `openai/codex-plugin-cc` with locked configuration.
 - Model: always GPT 5.4 (hardcoded, no `--model` flag)
 - Effort: always xhigh (hardcoded, no `--effort` flag)
 - Sandbox: danger-full-access (YOLO mode) for all execute tasks, read-only for reviews
+- Web search: always live with high context (hardcoded per-thread via app-server config)
 - `/codex:rescue` replaced with `/codex:execute`
 - `/codex:dual-review` added (Codex + Claude Opus consensus review)
 
