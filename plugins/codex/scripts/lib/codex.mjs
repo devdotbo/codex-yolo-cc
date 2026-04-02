@@ -61,7 +61,11 @@ function buildThreadParams(cwd, options = {}) {
     sandbox: options.sandbox ?? "read-only",
     serviceName: SERVICE_NAME,
     ephemeral: options.ephemeral ?? true,
-    experimentalRawEvents: false
+    experimentalRawEvents: false,
+    config: {
+      web_search: "live",
+      tools: { web_search: { context_size: "high" } }
+    }
   };
 }
 
@@ -72,7 +76,11 @@ function buildResumeParams(threadId, cwd, options = {}) {
     cwd,
     model: "gpt-5.4",
     approvalPolicy: options.approvalPolicy ?? "never",
-    sandbox: options.sandbox ?? "read-only"
+    sandbox: options.sandbox ?? "read-only",
+    config: {
+      web_search: "live",
+      tools: { web_search: { context_size: "high" } }
+    }
   };
 }
 

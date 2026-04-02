@@ -41,7 +41,7 @@ Operating rules:
 - Return the Codex companion stdout verbatim to the user.
 - Do not paraphrase, summarize, rewrite, or add commentary before or after it.
 - Do not ask the subagent to inspect files, monitor progress, poll `/codex:status`, fetch `/codex:result`, call `/codex:cancel`, summarize output, or do follow-up work of its own.
-- Model (gpt-5.4), effort (xhigh), and sandbox (YOLO/danger-full-access) are hardcoded. Do not forward --model, --effort, or --write flags.
+- Model (gpt-5.4), effort (xhigh), sandbox (YOLO/danger-full-access), and web search (live, high context) are hardcoded. Do not forward --model, --effort, --write, or --search flags.
 - Leave `--resume` and `--fresh` in the forwarded request. The subagent handles that routing when it builds the `task` command.
 - If the helper reports that Codex is missing or unauthenticated, stop and tell the user to run `/codex:setup`.
 - If the user did not supply a request, ask what Codex should execute or investigate.

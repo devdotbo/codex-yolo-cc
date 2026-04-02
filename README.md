@@ -266,7 +266,7 @@ The Codex plugin wraps the [Codex app server](https://developers.openai.com/code
 
 ### Common Configurations
 
-This fork forces GPT 5.4 at xhigh reasoning for all execute tasks. Model and effort flags are not available. You can still configure other Codex options in your `config.toml`.
+This fork forces GPT 5.4 at xhigh reasoning for all execute tasks. Model and effort flags are not available. Web search is always enabled (`live` mode, `high` context) per-thread. You can still configure other Codex options in your `config.toml`.
 
 Your configuration will be picked up based on:
 
