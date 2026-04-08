@@ -1,9 +1,9 @@
 {
-  "name": "@openai/codex-plugin-cc",
-  "version": "1.0.2",
+  "name": "@devdotbo/codex-yolo-cc",
+  "version": "1.1.0-yolo",
   "private": true,
   "type": "module",
-  "description": "Use Codex from Claude Code to review code or delegate tasks.",
+  "description": "Codex YOLO plugin for Claude Code - GPT 5.4 xhigh, full-access execute, dual-review.",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=18.18.0"
