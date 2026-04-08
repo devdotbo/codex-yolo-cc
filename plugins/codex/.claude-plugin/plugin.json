@@ -1,8 +1,8 @@
 {
   "name": "codex",
-  "version": "1.1.0-custom",
-  "description": "Customized Codex: GPT 5.4 xhigh, YOLO mode execute, dual-review workflow.",
+  "version": "1.1.0-yolo",
+  "description": "Codex YOLO - GPT 5.4 xhigh, full-access execute, dual-review workflow.",
   "author": {
-    "name": "OpenAI (forked)"
+    "name": "devdotbo"
   }
 }

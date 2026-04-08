@@ -1,6 +1,6 @@
-# Codex Plugin Fork - GPT 5.4 xhigh YOLO Mode
+# Codex YOLO Plugin - GPT 5.4 xhigh Full-Access Mode
 
-Custom fork of `openai/codex-plugin-cc` with locked configuration.
+Custom fork of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin-cc) with locked configuration for maximum capability.
 
 ## What Changed
 
@@ -20,9 +20,9 @@ Two things outside this repo must point here for the fork to load:
 `~/.claude/plugins/installed_plugins.json` must have:
 
 ```json
-"codex@openai-codex": [{
-  "installPath": "/Users/bioharz/git/codex-plugin-cc/plugins/codex",
-  "version": "1.1.0-custom"
+"codex@codex-yolo": [{
+  "installPath": "<YOUR_CLONE_PATH>/plugins/codex",
+  "version": "1.1.0-yolo"
 }]
 ```
 
@@ -32,14 +32,17 @@ The marketplace clone must symlink to the fork (prevents ghost commands):
 
 ```bash
 rm -rf ~/.claude/plugins/marketplaces/openai-codex/plugins/codex
-ln -s /Users/bioharz/git/codex-plugin-cc/plugins/codex ~/.claude/plugins/marketplaces/openai-codex/plugins/codex
+ln -s <YOUR_CLONE_PATH>/plugins/codex ~/.claude/plugins/marketplaces/openai-codex/plugins/codex
 ```
+
+Replace `<YOUR_CLONE_PATH>` with the absolute path where you cloned this repo.
 
 ## Merging Upstream
 
 ```bash
-git fetch origin
-git merge origin/main
+git remote add upstream https://github.com/openai/codex-plugin-cc.git
+git fetch upstream
+git merge upstream/main
 ```
 
 Conflicts will be localized to `normalizeRequestedModel`, `normalizeReasoningEffort`, and the sandbox line in `executeTaskRun`.
