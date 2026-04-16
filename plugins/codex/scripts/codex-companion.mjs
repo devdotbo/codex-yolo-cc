@@ -101,8 +101,20 @@ function normalizeRequestedModel(_model) {
   return "gpt-5.4";
 }
 
-function normalizeReasoningEffort(_effort) {
-  return "xhigh";
+function normalizeReasoningEffort(effort) {
+  if (effort == null) {
+    return "xhigh";
+  }
+  const normalized = String(effort).trim().toLowerCase();
+  if (!normalized) {
+    return "xhigh";
+  }
+  if (!VALID_REASONING_EFFORTS.has(normalized)) {
+    throw new Error(
+      `Unsupported reasoning effort "${effort}". Use one of: none, minimal, low, medium, high, xhigh.`
+    );
+  }
+  return normalized;
 }
 
 function normalizeArgv(argv) {

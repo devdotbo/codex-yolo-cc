@@ -645,7 +645,7 @@ test("task forwards model selection and reasoning effort to app-server turn/star
   assert.equal(result.status, 0, result.stderr);
   const fakeState = JSON.parse(fs.readFileSync(statePath, "utf8"));
   assert.equal(fakeState.lastTurnStart.model, "gpt-5.4");
-  assert.equal(fakeState.lastTurnStart.effort, "xhigh");
+  assert.equal(fakeState.lastTurnStart.effort, "low");
 });
 
 test("task logs reasoning summaries and assistant messages to the job log", () => {

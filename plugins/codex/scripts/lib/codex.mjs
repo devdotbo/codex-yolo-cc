@@ -1014,7 +1014,7 @@ export async function runAppServerTurn(cwd, options = {}) {
           threadId,
           input: buildTurnInput(prompt),
           model: "gpt-5.4",
-          effort: "xhigh",
+          effort: options.effort ?? "xhigh",
           outputSchema: options.outputSchema ?? null
         }),
       { onProgress: options.onProgress }

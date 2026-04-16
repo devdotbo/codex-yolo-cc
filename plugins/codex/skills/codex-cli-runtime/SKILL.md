@@ -18,7 +18,7 @@ Execution rules:
 - Use `task` for every execute request, including diagnosis, planning, research, and explicit fix requests.
 - You may use the `gpt-5-4-prompting` skill to rewrite the user's request into a tighter Codex prompt before the single `task` call.
 - That prompt drafting is the only Claude-side work allowed. Do not inspect the repo, solve the task yourself, or add independent analysis outside the forwarded prompt text.
-- Model (gpt-5.4), effort (xhigh), sandbox (YOLO/danger-full-access), and web search (live, high context) are hardcoded. Do not add --model, --effort, --write, or --search flags.
+- Model (gpt-5.4), sandbox (YOLO/danger-full-access), and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --model, --write, or --search flags.
 
 Command selection:
 - Use exactly one `task` invocation per execute handoff.
