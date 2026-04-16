@@ -9,7 +9,7 @@ Custom fork of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin
 - Sandbox: danger-full-access (YOLO mode) for all execute tasks, read-only for reviews
 - Web search: always live with high context (hardcoded per-thread via app-server config)
 - `/codex:rescue` replaced with `/codex:execute`
-- `/codex:dual-review` added (Codex + Claude Opus consensus review)
+
 
 ## Local Setup Required
 

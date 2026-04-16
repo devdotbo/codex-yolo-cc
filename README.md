@@ -219,19 +219,6 @@ When the review gate is enabled, the plugin uses a `Stop` hook to run a targeted
 > [!WARNING]
 > The review gate can create a long-running Claude/Codex loop and may drain usage limits quickly. Only enable it when you plan to actively monitor the session.
 
-### `/codex:dual-review`
-
-Runs a dual review where both Codex (GPT 5.4 xhigh) and Claude Opus independently review changes, then presents a synthesis with consensus findings, disagreements, and a verdict.
-
-Examples:
-
-```bash
-/codex:dual-review
-/codex:dual-review --base main
-```
-
-This command is read-only. It does not fix code. Both reviewers must agree for an APPROVED verdict.
-
 ## Typical Flows
 
 ### Review Before Shipping
