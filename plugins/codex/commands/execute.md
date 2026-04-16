@@ -1,5 +1,5 @@
 ---
-description: Delegate execution to Codex GPT 5.4 (xhigh, YOLO mode)
+description: Delegate execution to Codex (default GPT 5.4 xhigh, YOLO mode)
 argument-hint: "[--background|--wait] [--resume|--fresh] [--model <model>] [--effort <level>] [what Codex should execute or investigate]"
 context: fork
 allowed-tools: Bash(node:*), AskUserQuestion

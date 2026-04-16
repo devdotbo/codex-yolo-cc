@@ -1,6 +1,6 @@
 ---
 name: codex-execute
-description: Proactively use when Claude Code should hand execution, investigation, or implementation to Codex GPT 5.4 in YOLO mode
+description: Proactively use when Claude Code should hand execution, investigation, or implementation to Codex in YOLO mode
 tools: Bash
 skills:
   - codex-cli-runtime

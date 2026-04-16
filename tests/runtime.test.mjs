@@ -668,6 +668,26 @@ test("task defaults to gpt-5.4 when no --model flag is provided", () => {
   assert.equal(fakeState.lastTurnStart.model, "gpt-5.4");
 });
 
+test("task rejects an unsupported --model value with a clear error", () => {
+  const repo = makeTempDir();
+  const binDir = makeTempDir();
+  installFakeCodex(binDir);
+  initGitRepo(repo);
+  fs.writeFileSync(path.join(repo, "README.md"), "hello\n");
+  run("git", ["add", "README.md"], { cwd: repo });
+  run("git", ["commit", "-m", "init"], { cwd: repo });
+
+  const result = run("node", [SCRIPT, "task", "--model", "invalid-model", "check rejected model"], {
+    cwd: repo,
+    env: buildEnv(binDir)
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Unsupported model "invalid-model"/);
+  assert.match(result.stderr, /gpt-5\.4/);
+  assert.match(result.stderr, /gpt-5\.4-mini/);
+});
+
 test("task logs reasoning summaries and assistant messages to the job log", () => {
   const repo = makeTempDir();
   const binDir = makeTempDir();
