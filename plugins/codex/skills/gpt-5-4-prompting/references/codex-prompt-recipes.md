@@ -148,3 +148,76 @@ Do not invent failure modes that are not supported by the examples.
 Before finalizing, make sure the revised prompt resolves the cited failure modes without adding contradictory instructions.
 </verification_loop>
 ```
+
+## Mini Recipes
+
+Simplified variants for gpt-5.4-mini. Use fewer blocks and shorter contracts.
+
+### Mini: Quick Lookup
+
+```xml
+<task>
+Find the specific file, function, or value requested.
+Return the result directly without analysis.
+</task>
+
+<compact_output_contract>
+Return the answer in one sentence or a short code snippet.
+No preamble.
+</compact_output_contract>
+```
+
+### Mini: Targeted Fix
+
+```xml
+<task>
+Apply the described fix to the specified file.
+Do not change anything outside the stated scope.
+</task>
+
+<compact_output_contract>
+Return: file changed, what changed, verification performed.
+</compact_output_contract>
+
+<action_safety>
+Keep changes tightly scoped. No unrelated refactors.
+</action_safety>
+```
+
+### Mini: File Search
+
+```xml
+<task>
+Search the repository for the specified pattern or file.
+Return matching paths and relevant line numbers.
+</task>
+
+<compact_output_contract>
+List matching files and line numbers. No analysis needed.
+</compact_output_contract>
+```
+
+### Mini: Type Check Interpretation
+
+```xml
+<task>
+Run the type checker and interpret the output.
+Identify which errors are real vs noise.
+</task>
+
+<compact_output_contract>
+List real errors with file, line, and one-line explanation each.
+</compact_output_contract>
+```
+
+### Mini: Git Operations
+
+```xml
+<task>
+Perform the requested git operation and report the result.
+</task>
+
+<compact_output_contract>
+Report: command run, outcome, any warnings.
+</compact_output_contract>
+```

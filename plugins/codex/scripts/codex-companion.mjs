@@ -15,6 +15,7 @@ import {
     getCodexAvailability,
     getSessionRuntimeStatus,
     interruptAppServerTurn,
+    looksLikeVerificationCommand,
     parseStructuredOutput,
     readOutputSchema,
     runAppServerReview,
@@ -68,7 +69,8 @@ const REVIEW_SCHEMA = path.join(ROOT_DIR, "schemas", "review-output.schema.json"
 const DEFAULT_STATUS_WAIT_TIMEOUT_MS = 240000;
 const DEFAULT_STATUS_POLL_INTERVAL_MS = 2000;
 const VALID_REASONING_EFFORTS = new Set(["none", "minimal", "low", "medium", "high", "xhigh"]);
-const MODEL_ALIASES = new Map([["spark", "gpt-5.3-codex-spark"]]);
+const VALID_MODELS = new Set(["gpt-5.4", "gpt-5.4-mini"]);
+const MODEL_ALIASES = new Map([["mini", "gpt-5.4-mini"]]);
 const STOP_REVIEW_TASK_MARKER = "Run a stop-gate review of the previous Claude turn.";
 
 function printUsage() {
@@ -136,12 +138,70 @@ function parseDecisionRequest(rawOutput) {
   return { blocker, evidence, options, recommended };
 }
 
+function parseConfidenceReport(rawOutput) {
+  if (!rawOutput || typeof rawOutput !== "string") {
+    return null;
+  }
+  const marker = "\nCONFIDENCE\n";
+  const idx = rawOutput.indexOf(marker);
+  if (idx === -1) {
+    return null;
+  }
+
+  const block = rawOutput.slice(idx + marker.length).trim();
+  const lines = block.split(/\r?\n/).map((l) => l.trim());
+  let level = "";
+  let basis = "";
+  let risks = "";
+
+  for (const line of lines) {
+    if (line.startsWith("level:")) {
+      level = line.slice("level:".length).trim();
+    } else if (line.startsWith("basis:")) {
+      basis = line.slice("basis:".length).trim();
+    } else if (line.startsWith("risks:")) {
+      risks = line.slice("risks:".length).trim();
+    }
+  }
+
+  if (!level) {
+    return null;
+  }
+
+  return { level, basis, risks };
+}
+
+function stripConfidenceBlock(rawOutput) {
+  if (!rawOutput || typeof rawOutput !== "string") {
+    return rawOutput;
+  }
+  const marker = "\nCONFIDENCE\n";
+  const idx = rawOutput.indexOf(marker);
+  if (idx === -1) {
+    return rawOutput;
+  }
+  return rawOutput.slice(0, idx).trimEnd();
+}
+
 function outputCommandResult(payload, rendered, asJson) {
   outputResult(asJson ? payload : rendered, asJson);
 }
 
-function normalizeRequestedModel(_model) {
-  return "gpt-5.4";
+function normalizeRequestedModel(model) {
+  if (model == null) {
+    return "gpt-5.4";
+  }
+  const normalized = String(model).trim().toLowerCase();
+  if (!normalized) {
+    return "gpt-5.4";
+  }
+  const resolved = MODEL_ALIASES.get(normalized) ?? normalized;
+  if (!VALID_MODELS.has(resolved)) {
+    throw new Error(
+      `Unsupported model "${model}". Use one of: ${[...VALID_MODELS].join(", ")}, or alias: ${[...MODEL_ALIASES.keys()].join(", ")}.`
+    );
+  }
+  return resolved;
 }
 
 function normalizeReasoningEffort(effort) {
@@ -492,6 +552,7 @@ async function executeReviewRun(request) {
 
 
 async function executeTaskRun(request) {
+  const startTime = Date.now();
   const workspaceRoot = resolveWorkspaceRoot(request.cwd);
   ensureCodexAvailable(request.cwd);
 
@@ -528,6 +589,8 @@ async function executeTaskRun(request) {
   });
 
   const rawOutput = typeof result.finalMessage === "string" ? result.finalMessage : "";
+  const confidence = parseConfidenceReport(rawOutput);
+  const cleanedOutput = confidence ? stripConfidenceBlock(rawOutput) : rawOutput;
   const failureMessage = result.error?.message ?? result.stderr ?? "";
 
   const decisionRequested = parseDecisionRequest(rawOutput);
@@ -535,7 +598,7 @@ async function executeTaskRun(request) {
     ? renderDecisionRequest(decisionRequested)
     : renderTaskResult(
         {
-          rawOutput,
+          rawOutput: cleanedOutput,
           failureMessage,
           reasoningSummary: result.reasoningSummary
         },
@@ -545,13 +608,30 @@ async function executeTaskRun(request) {
           write: Boolean(request.write)
         }
       );
+  const durationMs = Date.now() - startTime;
+  const verificationsRun = (result.commandExecutions ?? [])
+    .filter(cmd => looksLikeVerificationCommand(cmd.command ?? ""));
+  const verificationsPassed = verificationsRun.every(cmd => cmd.exitCode === 0);
+
   const payload = {
     status: result.status,
     threadId: result.threadId,
+    model: request.model,
+    effort: request.effort,
+    durationMs,
     rawOutput,
     touchedFiles: result.touchedFiles,
     reasoningSummary: result.reasoningSummary,
-    decisionRequested
+    decisionRequested,
+    confidence,
+    verification: {
+      ran: verificationsRun.length > 0,
+      passed: verificationsRun.length > 0 ? verificationsPassed : null,
+      commands: verificationsRun.map(cmd => ({
+        command: cmd.command,
+        exitCode: cmd.exitCode
+      }))
+    }
   };
 
   return {

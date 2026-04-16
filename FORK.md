@@ -4,7 +4,7 @@ Custom fork of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin
 
 ## What Changed
 
-- Model: always GPT 5.4 (hardcoded, no `--model` flag)
+- Model: defaults to GPT 5.4, accepts `--model <model>` override (gpt-5.4, gpt-5.4-mini)
 - Effort: defaults to xhigh, accepts `--effort <level>` override (medium, high, xhigh, etc.)
 - Sandbox: danger-full-access (YOLO mode) for all execute tasks, read-only for reviews
 - Web search: always live with high context (hardcoded per-thread via app-server config)

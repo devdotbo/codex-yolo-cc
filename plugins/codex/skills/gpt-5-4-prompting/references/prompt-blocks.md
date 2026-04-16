@@ -199,3 +199,21 @@ recommended: <A or B>
 Do NOT use this for low-stakes defaults. Only escalate when the wrong choice causes rework or correctness issues.
 </decision_escalation_contract>
 ```
+
+## Confidence Reporting
+
+### `confidence_report`
+
+Use when the orchestrator needs to know how confident Codex is in its result.
+
+```xml
+<confidence_report>
+After completing the task, end your response with a CONFIDENCE block:
+CONFIDENCE
+level: high|medium|low
+basis: <what evidence supports this level>
+risks: <what could be wrong that you could not verify>
+
+Only omit this block if the task is purely mechanical with no ambiguity.
+</confidence_report>
+```

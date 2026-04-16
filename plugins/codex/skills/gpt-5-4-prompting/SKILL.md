@@ -56,3 +56,16 @@ When to add the decision escalation contract:
 Reusable blocks live in [references/prompt-blocks.md](references/prompt-blocks.md).
 Concrete end-to-end templates live in [references/codex-prompt-recipes.md](references/codex-prompt-recipes.md).
 Common failure modes to avoid live in [references/codex-prompt-antipatterns.md](references/codex-prompt-antipatterns.md).
+
+## Model-Specific Prompt Guidance
+
+| Model | Strengths | Prompt strategy |
+|-------|-----------|-----------------|
+| gpt-5.4 | Deep reasoning, complex multi-step tasks, nuanced code review | Full prompt recipes with all blocks. Use completeness_contract and verification_loop. |
+| gpt-5.4-mini | Fast, cost-effective, good at focused single-step tasks | Simplified prompts. Prefer compact_output_contract. Skip dig_deeper_nudge. Keep task scope narrow. |
+
+When the selected model is gpt-5.4-mini:
+- Prefer one clear, bounded task over multi-step orchestration
+- Use compact_output_contract instead of structured_output_contract
+- Skip verification_loop for simple lookups and file searches
+- Keep the total prompt under ~2000 tokens when possible

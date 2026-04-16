@@ -156,7 +156,7 @@ Ask Codex to redesign the database connection to be more resilient.
 
 **Notes:**
 
-- model is always GPT 5.4, effort is always xhigh - no flags needed
+- model defaults to GPT 5.4 (also supports gpt-5.4-mini via --model), effort defaults to xhigh (accepts --effort)
 - sandbox runs in YOLO mode (danger-full-access) - full read/write/exec access
 - follow-up execute requests can continue the latest Codex task in the repo
 
@@ -253,7 +253,7 @@ The Codex plugin wraps the [Codex app server](https://developers.openai.com/code
 
 ### Common Configurations
 
-This fork forces GPT 5.4 at xhigh reasoning for all execute tasks. Model and effort flags are not available. Web search is always enabled (`live` mode, `high` context) per-thread. You can still configure other Codex options in your `config.toml`.
+This fork defaults to GPT 5.4 at xhigh reasoning for all execute tasks. Model selection accepts `--model` (gpt-5.4, gpt-5.4-mini) and effort accepts `--effort`. Web search is always enabled (`live` mode, `high` context) per-thread. You can still configure other Codex options in your `config.toml`.
 
 Your configuration will be picked up based on:
 

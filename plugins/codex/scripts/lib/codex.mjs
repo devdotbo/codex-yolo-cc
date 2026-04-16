@@ -56,7 +56,7 @@ function cleanCodexStderr(stderr) {
 function buildThreadParams(cwd, options = {}) {
   return {
     cwd,
-    model: "gpt-5.4",
+    model: options.model ?? "gpt-5.4",
     approvalPolicy: options.approvalPolicy ?? "never",
     sandbox: options.sandbox ?? "read-only",
     serviceName: SERVICE_NAME,
@@ -74,7 +74,7 @@ function buildResumeParams(threadId, cwd, options = {}) {
   return {
     threadId,
     cwd,
-    model: "gpt-5.4",
+    model: options.model ?? "gpt-5.4",
     approvalPolicy: options.approvalPolicy ?? "never",
     sandbox: options.sandbox ?? "read-only",
     config: {
@@ -1013,7 +1013,7 @@ export async function runAppServerTurn(cwd, options = {}) {
         client.request("turn/start", {
           threadId,
           input: buildTurnInput(prompt),
-          model: "gpt-5.4",
+          model: options.model ?? "gpt-5.4",
           effort: options.effort ?? "xhigh",
           outputSchema: options.outputSchema ?? null
         }),
@@ -1093,4 +1093,4 @@ export function readOutputSchema(schemaPath) {
   return readJsonFile(schemaPath);
 }
 
-export { DEFAULT_CONTINUE_PROMPT, TASK_THREAD_PREFIX };
+export { DEFAULT_CONTINUE_PROMPT, TASK_THREAD_PREFIX, looksLikeVerificationCommand };

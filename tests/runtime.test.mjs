@@ -637,7 +637,28 @@ test("task forwards model selection and reasoning effort to app-server turn/star
   run("git", ["add", "README.md"], { cwd: repo });
   run("git", ["commit", "-m", "init"], { cwd: repo });
 
-  const result = run("node", [SCRIPT, "task", "--model", "spark", "--effort", "low", "diagnose the failing test"], {
+  const result = run("node", [SCRIPT, "task", "--model", "gpt-5.4-mini", "--effort", "low", "diagnose the failing test"], {
+    cwd: repo,
+    env: buildEnv(binDir)
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const fakeState = JSON.parse(fs.readFileSync(statePath, "utf8"));
+  assert.equal(fakeState.lastTurnStart.model, "gpt-5.4-mini");
+  assert.equal(fakeState.lastTurnStart.effort, "low");
+});
+
+test("task defaults to gpt-5.4 when no --model flag is provided", () => {
+  const repo = makeTempDir();
+  const binDir = makeTempDir();
+  const statePath = path.join(binDir, "fake-codex-state.json");
+  installFakeCodex(binDir);
+  initGitRepo(repo);
+  fs.writeFileSync(path.join(repo, "README.md"), "hello\n");
+  run("git", ["add", "README.md"], { cwd: repo });
+  run("git", ["commit", "-m", "init"], { cwd: repo });
+
+  const result = run("node", [SCRIPT, "task", "check default model"], {
     cwd: repo,
     env: buildEnv(binDir)
   });
@@ -645,7 +666,6 @@ test("task forwards model selection and reasoning effort to app-server turn/star
   assert.equal(result.status, 0, result.stderr);
   const fakeState = JSON.parse(fs.readFileSync(statePath, "utf8"));
   assert.equal(fakeState.lastTurnStart.model, "gpt-5.4");
-  assert.equal(fakeState.lastTurnStart.effort, "low");
 });
 
 test("task logs reasoning summaries and assistant messages to the job log", () => {
