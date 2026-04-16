@@ -170,3 +170,32 @@ If you provide progress updates, keep them brief and outcome-based.
 Mention only major phase changes or blockers.
 </progress_updates>
 ```
+
+## Decision Escalation
+
+### `decision_escalation_contract`
+
+Use when Codex may encounter blockers that require planner-level authority.
+
+```xml
+<decision_escalation_contract>
+When you encounter any of these blockers, emit a DECISION_NEEDED block instead of guessing:
+- Contradictory requirements or constraints
+- Multiple valid approaches with materially different tradeoffs
+- Overlapping file sets that could cause conflicts with parallel work
+- Missing information that changes correctness or safety
+
+Format (must be the ONLY content in your final answer):
+DECISION_NEEDED
+blocker: <one-line description of what blocks progress>
+evidence:
+- <supporting fact 1>
+- <supporting fact 2>
+options:
+- A: <option description>
+- B: <option description>
+recommended: <A or B>
+
+Do NOT use this for low-stakes defaults. Only escalate when the wrong choice causes rework or correctness issues.
+</decision_escalation_contract>
+```

@@ -195,3 +195,22 @@ test("setup command can offer Codex install and still points users to codex logi
   assert.match(readme, /\/codex:setup --enable-review-gate/);
   assert.match(readme, /\/codex:setup --disable-review-gate/);
 });
+
+test("execute command documents decision handling", () => {
+  const execute = read("commands/execute.md");
+  assert.match(execute, /CODEX DECISION NEEDED/);
+  assert.match(execute, /AskUserQuestion/);
+  assert.match(execute, /--resume "Decision:/);
+});
+
+test("prompting skill references decision escalation contract", () => {
+  const promptingSkill = read("skills/gpt-5-4-prompting/SKILL.md");
+  const promptBlocks = read("skills/gpt-5-4-prompting/references/prompt-blocks.md");
+  assert.match(promptingSkill, /decision_escalation_contract/);
+  assert.match(promptBlocks, /DECISION_NEEDED/);
+  assert.match(promptBlocks, /decision_escalation_contract/);
+  assert.match(promptBlocks, /blocker:/);
+  assert.match(promptBlocks, /evidence:/);
+  assert.match(promptBlocks, /options:/);
+  assert.match(promptBlocks, /recommended:/);
+});

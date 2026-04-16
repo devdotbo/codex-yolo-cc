@@ -445,6 +445,40 @@ export function renderStoredJobResult(job, storedJob) {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
+export function renderDecisionRequest(parsed) {
+  const lines = [
+    "CODEX DECISION NEEDED",
+    "",
+    `Blocker: ${parsed.blocker}`,
+    ""
+  ];
+
+  if (parsed.evidence.length > 0) {
+    lines.push("Evidence:");
+    for (const fact of parsed.evidence) {
+      lines.push(`- ${fact}`);
+    }
+    lines.push("");
+  }
+
+  if (parsed.options.length > 0) {
+    lines.push("Options:");
+    for (const option of parsed.options) {
+      lines.push(`  ${option}`);
+    }
+    lines.push("");
+  }
+
+  if (parsed.recommended) {
+    lines.push(`Recommended: ${parsed.recommended}`);
+    lines.push("");
+  }
+
+  lines.push('Reply with /codex:execute --resume "Decision: <A or B>. <optional rationale>"');
+
+  return `${lines.join("\n").trimEnd()}\n`;
+}
+
 export function renderCancelReport(job) {
   const lines = [
     "# Codex Cancel",

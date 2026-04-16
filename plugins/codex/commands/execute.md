@@ -45,3 +45,10 @@ Operating rules:
 - Leave `--resume` and `--fresh` in the forwarded request. The subagent handles that routing when it builds the `task` command.
 - If the helper reports that Codex is missing or unauthenticated, stop and tell the user to run `/codex:setup`.
 - If the user did not supply a request, ask what Codex should execute or investigate.
+
+Decision handling:
+
+- When the companion output starts with `CODEX DECISION NEEDED`, Codex is requesting a decision before it can continue.
+- Present the decision request to the user exactly as returned by the companion.
+- Use `AskUserQuestion` to ask the user which option to choose. Offer the options listed in the output plus a free-text option.
+- After the user chooses, resume by running `/codex:execute --resume "Decision: <choice>. <user rationale if any>"`.

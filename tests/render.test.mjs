@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { renderReviewResult, renderStoredJobResult } from "../plugins/codex/scripts/lib/render.mjs";
+import { renderDecisionRequest, renderReviewResult, renderStoredJobResult } from "../plugins/codex/scripts/lib/render.mjs";
 
 test("renderReviewResult degrades gracefully when JSON is missing required review fields", () => {
   const output = renderReviewResult(
@@ -56,4 +56,47 @@ test("renderStoredJobResult prefers rendered output for structured review jobs",
   assert.doesNotMatch(output, /^\{/);
   assert.match(output, /Codex session ID: thr_123/);
   assert.match(output, /Resume in Codex: codex resume thr_123/);
+});
+
+test("renderDecisionRequest formats a decision request for display", () => {
+  const parsed = {
+    blocker: "Two valid migration strategies with different rollback risks",
+    evidence: [
+      "Strategy A uses additive columns only",
+      "Strategy B renames and drops, blocking rollback"
+    ],
+    options: [
+      "A: Additive migration with backfill",
+      "B: Rename-and-drop migration"
+    ],
+    recommended: "A"
+  };
+
+  const output = renderDecisionRequest(parsed);
+
+  assert.match(output, /^CODEX DECISION NEEDED/);
+  assert.match(output, /Blocker: Two valid migration strategies/);
+  assert.match(output, /Strategy A uses additive columns only/);
+  assert.match(output, /Strategy B renames and drops/);
+  assert.match(output, /A: Additive migration with backfill/);
+  assert.match(output, /B: Rename-and-drop migration/);
+  assert.match(output, /Recommended: A/);
+  assert.match(output, /\/codex:execute --resume "Decision:/);
+});
+
+test("renderDecisionRequest handles empty evidence and options gracefully", () => {
+  const parsed = {
+    blocker: "Missing database credentials for staging",
+    evidence: [],
+    options: [],
+    recommended: ""
+  };
+
+  const output = renderDecisionRequest(parsed);
+
+  assert.match(output, /^CODEX DECISION NEEDED/);
+  assert.match(output, /Blocker: Missing database credentials/);
+  assert.doesNotMatch(output, /Evidence:/);
+  assert.doesNotMatch(output, /Options:/);
+  assert.doesNotMatch(output, /Recommended:/);
 });

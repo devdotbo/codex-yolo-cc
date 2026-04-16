@@ -49,6 +49,10 @@ Prompt assembly checklist:
 4. Add verification, grounding, and safety tags only where the task needs them.
 5. Remove redundant instructions before sending the prompt.
 
+When to add the decision escalation contract:
+- Include `decision_escalation_contract` in any prompt where Codex may encounter contradictions, ambiguous requirements, overlapping file sets, or missing information that changes correctness.
+- The contract tells Codex to emit a structured `DECISION_NEEDED` marker instead of guessing. The companion script detects this marker and surfaces it to Claude Code for resolution.
+
 Reusable blocks live in [references/prompt-blocks.md](references/prompt-blocks.md).
 Concrete end-to-end templates live in [references/codex-prompt-recipes.md](references/codex-prompt-recipes.md).
 Common failure modes to avoid live in [references/codex-prompt-antipatterns.md](references/codex-prompt-antipatterns.md).

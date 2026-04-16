@@ -56,6 +56,7 @@ import {
   renderReviewResult,
   renderStoredJobResult,
   renderCancelReport,
+  renderDecisionRequest,
   renderJobStatusReport,
   renderSetupReport,
   renderStatusReport,
@@ -91,6 +92,48 @@ function outputResult(value, asJson) {
   } else {
     process.stdout.write(value);
   }
+}
+
+function parseDecisionRequest(rawOutput) {
+  if (!rawOutput || typeof rawOutput !== "string") {
+    return null;
+  }
+  const trimmed = rawOutput.trim();
+  if (!trimmed.startsWith("DECISION_NEEDED")) {
+    return null;
+  }
+
+  const lines = trimmed.split(/\r?\n/).map((l) => l.trim());
+  let blocker = "";
+  const evidence = [];
+  const options = [];
+  let recommended = "";
+  let section = null;
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("blocker:")) {
+      blocker = line.slice("blocker:".length).trim();
+      section = null;
+    } else if (line === "evidence:") {
+      section = "evidence";
+    } else if (line === "options:") {
+      section = "options";
+    } else if (line.startsWith("recommended:")) {
+      recommended = line.slice("recommended:".length).trim();
+      section = null;
+    } else if (section === "evidence" && line.startsWith("- ")) {
+      evidence.push(line.slice(2));
+    } else if (section === "options" && line.startsWith("- ")) {
+      options.push(line.slice(2));
+    }
+  }
+
+  if (!blocker) {
+    return null;
+  }
+
+  return { blocker, evidence, options, recommended };
 }
 
 function outputCommandResult(payload, rendered, asJson) {
@@ -486,33 +529,40 @@ async function executeTaskRun(request) {
 
   const rawOutput = typeof result.finalMessage === "string" ? result.finalMessage : "";
   const failureMessage = result.error?.message ?? result.stderr ?? "";
-  const rendered = renderTaskResult(
-    {
-      rawOutput,
-      failureMessage,
-      reasoningSummary: result.reasoningSummary
-    },
-    {
-      title: taskMetadata.title,
-      jobId: request.jobId ?? null,
-      write: Boolean(request.write)
-    }
-  );
+
+  const decisionRequested = parseDecisionRequest(rawOutput);
+  const rendered = decisionRequested
+    ? renderDecisionRequest(decisionRequested)
+    : renderTaskResult(
+        {
+          rawOutput,
+          failureMessage,
+          reasoningSummary: result.reasoningSummary
+        },
+        {
+          title: taskMetadata.title,
+          jobId: request.jobId ?? null,
+          write: Boolean(request.write)
+        }
+      );
   const payload = {
     status: result.status,
     threadId: result.threadId,
     rawOutput,
     touchedFiles: result.touchedFiles,
-    reasoningSummary: result.reasoningSummary
+    reasoningSummary: result.reasoningSummary,
+    decisionRequested
   };
 
   return {
-    exitStatus: result.status,
+    exitStatus: decisionRequested ? "decision-needed" : result.status,
     threadId: result.threadId,
     turnId: result.turnId,
     payload,
     rendered,
-    summary: firstMeaningfulLine(rawOutput, firstMeaningfulLine(failureMessage, `${taskMetadata.title} finished.`)),
+    summary: decisionRequested
+      ? `Decision needed: ${decisionRequested.blocker}`
+      : firstMeaningfulLine(rawOutput, firstMeaningfulLine(failureMessage, `${taskMetadata.title} finished.`)),
     jobTitle: taskMetadata.title,
     jobClass: "task",
     write: Boolean(request.write)
