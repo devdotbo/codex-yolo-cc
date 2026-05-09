@@ -1,11 +1,11 @@
 ---
-description: Delegate execution to Codex (default GPT 5.4 xhigh, YOLO mode)
+description: Delegate execution to Codex (default GPT 5.5 xhigh, YOLO mode)
 argument-hint: "[--background|--wait] [--resume|--fresh] [--model <model>] [--effort <level>] [what Codex should execute or investigate]"
-context: fork
-allowed-tools: Bash(node:*), AskUserQuestion
+allowed-tools: Bash(node:*), AskUserQuestion, Agent
 ---
 
-Route this request to the `codex:codex-execute` subagent.
+Invoke the `codex:codex-execute` subagent via the `Agent` tool (`subagent_type: "codex:codex-execute"`), forwarding the raw user request as the prompt.
+`codex:codex-execute` is a subagent, not a skill, do not call `Skill(codex:codex-execute)` (no such skill) or `Skill(codex:execute)` (that re-enters this command and hangs the session). The command runs inline so the `Agent` tool stays in scope; forked general-purpose subagents do not expose it.
 The final user-visible response must be Codex's output verbatim.
 
 Raw user request:
@@ -41,7 +41,7 @@ Operating rules:
 - Return the Codex companion stdout verbatim to the user.
 - Do not paraphrase, summarize, rewrite, or add commentary before or after it.
 - Do not ask the subagent to inspect files, monitor progress, poll `/codex:status`, fetch `/codex:result`, call `/codex:cancel`, summarize output, or do follow-up work of its own.
-- Model defaults to gpt-5.4 and accepts --model <model> (gpt-5.4, gpt-5.4-mini, or alias: mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
+- Model defaults to gpt-5.5 and accepts --model <model> (gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
 - Leave `--resume` and `--fresh` in the forwarded request. The subagent handles that routing when it builds the `task` command.
 - If the helper reports that Codex is missing or unauthenticated, stop and tell the user to run `/codex:setup`.
 - If the user did not supply a request, ask what Codex should execute or investigate.

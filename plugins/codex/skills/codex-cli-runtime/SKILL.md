@@ -16,9 +16,9 @@ Execution rules:
 - Prefer the helper over hand-rolled `git`, direct Codex CLI strings, or any other Bash activity.
 - Do not call `setup`, `review`, `adversarial-review`, `status`, `result`, or `cancel` from `codex:codex-execute`.
 - Use `task` for every execute request, including diagnosis, planning, research, and explicit fix requests.
-- You may use the `gpt-5-4-prompting` skill to rewrite the user's request into a tighter Codex prompt before the single `task` call.
+- You may use the `gpt-5-5-prompting` skill to rewrite the user's request into a tighter Codex prompt before the single `task` call.
 - That prompt drafting is the only Claude-side work allowed. Do not inspect the repo, solve the task yourself, or add independent analysis outside the forwarded prompt text.
-- Model defaults to gpt-5.4 and accepts --model <model> (gpt-5.4, gpt-5.4-mini, or alias: mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
+- Model defaults to gpt-5.5 and accepts --model <model> (gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
 
 Command selection:
 - Use exactly one `task` invocation per execute handoff.

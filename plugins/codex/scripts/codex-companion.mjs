@@ -69,8 +69,12 @@ const REVIEW_SCHEMA = path.join(ROOT_DIR, "schemas", "review-output.schema.json"
 const DEFAULT_STATUS_WAIT_TIMEOUT_MS = 240000;
 const DEFAULT_STATUS_POLL_INTERVAL_MS = 2000;
 const VALID_REASONING_EFFORTS = new Set(["none", "minimal", "low", "medium", "high", "xhigh"]);
-const VALID_MODELS = new Set(["gpt-5.4", "gpt-5.4-mini"]);
-const MODEL_ALIASES = new Map([["mini", "gpt-5.4-mini"]]);
+const VALID_MODELS = new Set(["gpt-5.5", "gpt-5.5-mini", "gpt-5.4", "gpt-5.4-mini"]);
+const MODEL_ALIASES = new Map([
+  ["mini", "gpt-5.5-mini"],
+  ["legacy", "gpt-5.4"],
+  ["legacy-mini", "gpt-5.4-mini"]
+]);
 const STOP_REVIEW_TASK_MARKER = "Run a stop-gate review of the previous Claude turn.";
 
 function printUsage() {
@@ -189,11 +193,11 @@ function outputCommandResult(payload, rendered, asJson) {
 
 function normalizeRequestedModel(model) {
   if (model == null) {
-    return "gpt-5.4";
+    return "gpt-5.5";
   }
   const normalized = String(model).trim().toLowerCase();
   if (!normalized) {
-    return "gpt-5.4";
+    return "gpt-5.5";
   }
   const resolved = MODEL_ALIASES.get(normalized) ?? normalized;
   if (!VALID_MODELS.has(resolved)) {

@@ -1,9 +1,9 @@
 {
   "name": "@devdotbo/codex-yolo-cc",
-  "version": "1.1.0-yolo",
+  "version": "1.2.0-yolo",
   "private": true,
   "type": "module",
-  "description": "Codex YOLO plugin for Claude Code - GPT 5.4 xhigh, full-access execute.",
+  "description": "Codex YOLO plugin for Claude Code - GPT 5.5 xhigh, full-access execute.",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=18.18.0"

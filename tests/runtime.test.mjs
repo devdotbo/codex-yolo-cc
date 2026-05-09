@@ -648,7 +648,7 @@ test("task forwards model selection and reasoning effort to app-server turn/star
   assert.equal(fakeState.lastTurnStart.effort, "low");
 });
 
-test("task defaults to gpt-5.4 when no --model flag is provided", () => {
+test("task defaults to gpt-5.5 when no --model flag is provided", () => {
   const repo = makeTempDir();
   const binDir = makeTempDir();
   const statePath = path.join(binDir, "fake-codex-state.json");
@@ -665,7 +665,34 @@ test("task defaults to gpt-5.4 when no --model flag is provided", () => {
 
   assert.equal(result.status, 0, result.stderr);
   const fakeState = JSON.parse(fs.readFileSync(statePath, "utf8"));
-  assert.equal(fakeState.lastTurnStart.model, "gpt-5.4");
+  assert.equal(fakeState.lastTurnStart.model, "gpt-5.5");
+});
+
+test("task accepts gpt-5.5 and the mini alias", () => {
+  const repo = makeTempDir();
+  const binDir = makeTempDir();
+  const statePath = path.join(binDir, "fake-codex-state.json");
+  installFakeCodex(binDir);
+  initGitRepo(repo);
+  fs.writeFileSync(path.join(repo, "README.md"), "hello\n");
+  run("git", ["add", "README.md"], { cwd: repo });
+  run("git", ["commit", "-m", "init"], { cwd: repo });
+
+  const runMini = run("node", [SCRIPT, "task", "--model", "mini", "check mini alias"], {
+    cwd: repo,
+    env: buildEnv(binDir)
+  });
+  assert.equal(runMini.status, 0, runMini.stderr);
+  const miniState = JSON.parse(fs.readFileSync(statePath, "utf8"));
+  assert.equal(miniState.lastTurnStart.model, "gpt-5.5-mini");
+
+  const runLegacy = run("node", [SCRIPT, "task", "--model", "legacy", "check legacy alias"], {
+    cwd: repo,
+    env: buildEnv(binDir)
+  });
+  assert.equal(runLegacy.status, 0, runLegacy.stderr);
+  const legacyState = JSON.parse(fs.readFileSync(statePath, "utf8"));
+  assert.equal(legacyState.lastTurnStart.model, "gpt-5.4");
 });
 
 test("task rejects an unsupported --model value with a clear error", () => {
@@ -684,8 +711,8 @@ test("task rejects an unsupported --model value with a clear error", () => {
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Unsupported model "invalid-model"/);
-  assert.match(result.stderr, /gpt-5\.4/);
-  assert.match(result.stderr, /gpt-5\.4-mini/);
+  assert.match(result.stderr, /gpt-5\.5/);
+  assert.match(result.stderr, /gpt-5\.5-mini/);
 });
 
 test("task logs reasoning summaries and assistant messages to the job log", () => {
