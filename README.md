@@ -11,7 +11,7 @@ they already have.
 
 - `/codex:review` for a normal read-only Codex review
 - `/codex:adversarial-review` for a steerable challenge review
-- `/codex:execute`, `/codex:status`, `/codex:result`, and `/codex:cancel` to delegate work and manage background jobs
+- `/codex:execute`, `/codex:transfer`, `/codex:status`, `/codex:result`, and `/codex:cancel` to delegate work, hand off sessions, and manage background jobs
 
 ## Requirements
 
@@ -159,6 +159,21 @@ Ask Codex to redesign the database connection to be more resilient.
 - model defaults to GPT 5.5 (also supports gpt-5.5-mini and gpt-5.4/5.4-mini fallbacks via --model; aliases: mini, legacy, legacy-mini), effort defaults to xhigh (accepts --effort)
 - sandbox runs in YOLO mode (danger-full-access) - full read/write/exec access
 - follow-up execute requests can continue the latest Codex task in the repo
+
+### `/codex:transfer`
+
+Creates a persistent Codex thread from the current Claude Code session and prints a `codex resume <session-id>` command.
+
+Use it when you started a debugging or implementation conversation in Claude Code and want to continue that same context directly in Codex.
+
+Examples:
+
+```bash
+/codex:transfer
+/codex:transfer --source ~/.claude/projects/-Users-me-repo/<session-id>.jsonl
+```
+
+The plugin's existing `SessionStart` hook supplies the current transcript path automatically; `--source` is available as a manual override. The transfer uses Codex's external-agent session importer, so it follows the same conversion rules as importing Claude history in the Codex App and creates visible turns that can be continued in the App or TUI. The source must be under `~/.claude/projects`, and older Codex versions that do not expose session import must be upgraded before using this command.
 
 ### `/codex:status`
 
