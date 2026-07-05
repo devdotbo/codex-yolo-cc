@@ -4,6 +4,21 @@ import path from "node:path";
 import process from "node:process";
 import { spawnSync } from "node:child_process";
 
+// A live Claude Code session injects companion runtime env vars into the test
+// process. resolveStateDir honors CLAUDE_PLUGIN_DATA and the CLI
+// session-filters jobs by CODEX_COMPANION_SESSION_ID, so leaked vars change
+// behavior both in-process and in every spawned CLI that inherits process.env.
+for (const name of [
+  "CLAUDE_PLUGIN_DATA",
+  "CODEX_COMPANION_APP_SERVER_ENDPOINT",
+  "CODEX_COMPANION_APP_SERVER_LOG_FILE",
+  "CODEX_COMPANION_APP_SERVER_PID_FILE",
+  "CODEX_COMPANION_SESSION_ID",
+  "CODEX_COMPANION_TRANSCRIPT_PATH"
+]) {
+  delete process.env[name];
+}
+
 export function makeTempDir(prefix = "codex-plugin-test-") {
   return fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 }

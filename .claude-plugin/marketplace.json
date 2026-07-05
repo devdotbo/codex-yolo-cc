@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "Codex YOLO plugin - GPT 5.5 xhigh, full-access execute.",
-    "version": "1.2.0-yolo"
+    "version": "1.3.0-yolo"
   },
   "plugins": [
     {
       "name": "codex",
       "description": "Codex YOLO - GPT 5.5 xhigh execute for Claude Code.",
-      "version": "1.2.0-yolo",
+      "version": "1.3.0-yolo",
       "author": {
         "name": "devdotbo"
       },

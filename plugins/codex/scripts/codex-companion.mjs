@@ -602,7 +602,7 @@ async function executeTaskRun(request) {
 
   const decisionRequested = parseDecisionRequest(rawOutput);
   const rendered = decisionRequested
-    ? renderDecisionRequest(decisionRequested)
+    ? renderDecisionRequest(decisionRequested, { threadId: result.threadId })
     : renderTaskResult(
         {
           rawOutput: cleanedOutput,
@@ -612,7 +612,8 @@ async function executeTaskRun(request) {
         {
           title: taskMetadata.title,
           jobId: request.jobId ?? null,
-          write: Boolean(request.write)
+          write: Boolean(request.write),
+          threadId: result.threadId
         }
       );
   const durationMs = Date.now() - startTime;

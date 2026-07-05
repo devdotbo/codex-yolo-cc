@@ -16,6 +16,7 @@ When the helper returns Codex output:
 - If Codex made edits, say so explicitly and list the touched files when the helper provides them.
 - For `codex:codex-execute`, do not turn a failed or incomplete Codex run into a Claude-side implementation attempt. Report the failure and stop.
 - For `codex:codex-execute`, if Codex was never successfully invoked, do not generate a substitute answer at all.
+- For `codex:codex-execute`, fail closed on the proof-of-Codex marker: a genuine completed run ends with a `Codex session ID: <thread-id>` line. If that line is missing from the response, treat it as a non-run or a failed run, say so explicitly, and stop. Never present unmarked text as a Codex result.
 - CRITICAL: After presenting review findings, STOP. Do not make any code changes. Do not fix any issues. You MUST explicitly ask the user which issues, if any, they want fixed before touching a single file. Auto-applying fixes from a review is strictly forbidden, even if the fix is obvious.
 - If the helper reports malformed output or a failed Codex run, include the most actionable stderr lines and stop there instead of guessing.
 - If the helper reports that setup or authentication is required, direct the user to `/codex:setup` and do not improvise alternate auth flows.

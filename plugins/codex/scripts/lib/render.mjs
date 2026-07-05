@@ -313,13 +313,22 @@ export function renderNativeReviewResult(result, meta) {
 }
 
 export function renderTaskResult(parsedResult, meta) {
+  const threadId = meta?.threadId ?? null;
   const rawOutput = typeof parsedResult?.rawOutput === "string" ? parsedResult.rawOutput : "";
   if (rawOutput) {
-    return rawOutput.endsWith("\n") ? rawOutput : `${rawOutput}\n`;
+    const output = rawOutput.endsWith("\n") ? rawOutput : `${rawOutput}\n`;
+    if (!threadId) {
+      return output;
+    }
+    return `${output}\nCodex session ID: ${threadId}\nResume in Codex: codex resume ${threadId}\n`;
   }
 
   const message = String(parsedResult?.failureMessage ?? "").trim() || "Codex did not return a final message.";
-  return `${message}\n`;
+  const output = `${message}\n`;
+  if (!threadId) {
+    return output;
+  }
+  return `${output}\nCodex session ID: ${threadId}\nResume in Codex: codex resume ${threadId}\n`;
 }
 
 export function renderStatusReport(report) {
@@ -445,7 +454,7 @@ export function renderStoredJobResult(job, storedJob) {
   return `${lines.join("\n").trimEnd()}\n`;
 }
 
-export function renderDecisionRequest(parsed) {
+export function renderDecisionRequest(parsed, meta = {}) {
   const lines = [
     "CODEX DECISION NEEDED",
     "",
@@ -475,6 +484,13 @@ export function renderDecisionRequest(parsed) {
   }
 
   lines.push('Reply with /codex:execute --resume "Decision: <A or B>. <optional rationale>"');
+
+  const threadId = meta.threadId ?? null;
+  if (threadId) {
+    lines.push("");
+    lines.push(`Codex session ID: ${threadId}`);
+    lines.push(`Resume in Codex: codex resume ${threadId}`);
+  }
 
   return `${lines.join("\n").trimEnd()}\n`;
 }

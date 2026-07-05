@@ -94,6 +94,9 @@ test("execute command absorbs continue semantics", () => {
   assert.match(execute, /allowed-tools:\s*Bash\(node:\*\),\s*AskUserQuestion,\s*Agent/);
   assert.match(execute, /subagent_type: "codex:codex-execute"/);
   assert.match(execute, /do not call `Skill\(codex:codex-execute\)`/i);
+  assert.doesNotMatch(execute, /forked general-purpose subagents do not expose it/i);
+  assert.match(execute, /Run this orchestration inline in the main context/i);
+  assert.match(execute, /status, result, cancel, transfer, resume prompts, or decision prompts/i);
   assert.doesNotMatch(execute, /^context:\s*fork\b/m);
   assert.match(execute, /--background\|--wait/);
   assert.match(execute, /--resume\|--fresh/);
@@ -118,6 +121,8 @@ test("execute command absorbs continue semantics", () => {
   assert.match(agent, /--fresh/);
   assert.match(agent, /thin forwarding wrapper/i);
   assert.match(agent, /Use exactly one `Bash` call/i);
+  assert.match(agent, /MUST make the companion `task` Bash call/i);
+  assert.match(agent, /MUST NOT answer from your own knowledge/i);
   assert.match(agent, /Do not inspect the repository, read files, grep, monitor progress, poll status, fetch results, cancel jobs, summarize output, or do any follow-up work of your own/i);
   assert.match(agent, /Do not call `review`, `adversarial-review`, `status`, `result`, or `cancel`/i);
   assert.match(agent, /Model defaults to gpt-5\.5 and accepts --model <model>/i);
@@ -127,6 +132,10 @@ test("execute command absorbs continue semantics", () => {
   assert.match(agent, /only to tighten the user's request into a better Codex prompt/i);
   assert.match(agent, /Do not use that skill to inspect the repository, reason through the problem yourself, draft a solution, or do any independent work/i);
   assert.match(runtimeSkill, /only job is to invoke `task` once and return that stdout unchanged/i);
+  assert.match(runtimeSkill, /`codex-companion task "<raw arguments>"`/);
+  assert.match(runtimeSkill, /context-independent launcher/i);
+  assert.match(runtimeSkill, /`\$\{CLAUDE_PLUGIN_ROOT\}` form is also valid in plugin command, agent, and hook contexts/i);
+  assert.match(runtimeSkill, /Do not answer from your own knowledge or fabricate a simple result/i);
   assert.match(runtimeSkill, /Do not call `setup`, `review`, `adversarial-review`, `status`, `result`, or `cancel`/i);
   assert.match(runtimeSkill, /use the `gpt-5-5-prompting` skill to rewrite the user's request into a tighter Codex prompt/i);
   assert.match(runtimeSkill, /That prompt drafting is the only Claude-side work allowed/i);

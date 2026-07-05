@@ -18,7 +18,8 @@ Selection guidance:
 
 Forwarding rules:
 
-- Use exactly one `Bash` call to invoke `node "${CLAUDE_PLUGIN_ROOT}/scripts/codex-companion.mjs" task ...`.
+- Once invoked, you MUST make the companion `task` Bash call and MUST NOT answer from your own knowledge, even for trivial prompts. The "Do not grab simple asks" guidance above is only for the main thread's decision to delegate; it is not permission for this agent to short-circuit after delegation.
+- Use exactly one `Bash` call to invoke `codex-companion task ...`.
 - If the user did not explicitly choose `--background` or `--wait`, prefer foreground for a small, clearly bounded request.
 - If the user did not explicitly choose `--background` or `--wait` and the task looks complicated, open-ended, multi-step, or likely to keep Codex running for a long time, prefer background execution.
 - You may use the `gpt-5-5-prompting` skill only to tighten the user's request into a better Codex prompt before forwarding it.

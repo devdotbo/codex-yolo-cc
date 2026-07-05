@@ -5,7 +5,7 @@ allowed-tools: Bash(node:*), AskUserQuestion, Agent
 ---
 
 Invoke the `codex:codex-execute` subagent via the `Agent` tool (`subagent_type: "codex:codex-execute"`), forwarding the raw user request as the prompt.
-`codex:codex-execute` is a subagent, not a skill, do not call `Skill(codex:codex-execute)` (no such skill) or `Skill(codex:execute)` (that re-enters this command and hangs the session). The command runs inline so the `Agent` tool stays in scope; forked general-purpose subagents do not expose it.
+`codex:codex-execute` is a subagent, not a skill, do not call `Skill(codex:codex-execute)` (no such skill) or `Skill(codex:execute)` (that re-enters this command and hangs the session). Run this orchestration inline in the main context: a forked general-purpose subagent can spawn `codex:codex-execute` and Codex will run, but it cannot drive the main control surface for status, result, cancel, transfer, resume prompts, or decision prompts.
 The final user-visible response must be Codex's output verbatim.
 
 Raw user request:
@@ -37,8 +37,9 @@ node "${CLAUDE_PLUGIN_ROOT}/scripts/codex-companion.mjs" task-resume-candidate -
 
 Operating rules:
 
-- The subagent is a thin forwarder only. It should use one `Bash` call to invoke `node "${CLAUDE_PLUGIN_ROOT}/scripts/codex-companion.mjs" task ...` and return that command's stdout as-is.
+- The subagent is a thin forwarder only. It should use one `Bash` call to invoke `codex-companion task ...` and return that command's stdout as-is.
 - Return the Codex companion stdout verbatim to the user.
+- Fail closed on the proof-of-Codex marker: a genuine completed run ends with a `Codex session ID: <thread-id>` line. If the subagent's response is empty or lacks that line, do not present it as Codex output. Report that no verified Codex run happened (or that the run failed before a thread was ready), point to `/codex:status`, and stop.
 - Do not paraphrase, summarize, rewrite, or add commentary before or after it.
 - Do not ask the subagent to inspect files, monitor progress, poll `/codex:status`, fetch `/codex:result`, call `/codex:cancel`, summarize output, or do follow-up work of its own.
 - Model defaults to gpt-5.5 and accepts --model <model> (gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.

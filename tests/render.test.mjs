@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { renderDecisionRequest, renderReviewResult, renderStoredJobResult } from "../plugins/codex/scripts/lib/render.mjs";
+import {
+  renderDecisionRequest,
+  renderReviewResult,
+  renderStoredJobResult,
+  renderTaskResult
+} from "../plugins/codex/scripts/lib/render.mjs";
 
 test("renderReviewResult degrades gracefully when JSON is missing required review fields", () => {
   const output = renderReviewResult(
@@ -58,6 +63,34 @@ test("renderStoredJobResult prefers rendered output for structured review jobs",
   assert.match(output, /Resume in Codex: codex resume thr_123/);
 });
 
+test("renderTaskResult appends a Codex session marker when a thread id is available", () => {
+  const output = renderTaskResult(
+    {
+      rawOutput: "Handled the requested task.\nTask prompt accepted."
+    },
+    {
+      threadId: "thr_task"
+    }
+  );
+
+  assert.equal(
+    output,
+    "Handled the requested task.\nTask prompt accepted.\n\nCodex session ID: thr_task\nResume in Codex: codex resume thr_task\n"
+  );
+});
+
+test("renderTaskResult leaves output unmarked when no thread id is available", () => {
+  const output = renderTaskResult(
+    {
+      rawOutput: "Handled the requested task."
+    },
+    {}
+  );
+
+  assert.equal(output, "Handled the requested task.\n");
+  assert.doesNotMatch(output, /Codex session ID:/);
+});
+
 test("renderDecisionRequest formats a decision request for display", () => {
   const parsed = {
     blocker: "Two valid migration strategies with different rollback risks",
@@ -72,7 +105,7 @@ test("renderDecisionRequest formats a decision request for display", () => {
     recommended: "A"
   };
 
-  const output = renderDecisionRequest(parsed);
+  const output = renderDecisionRequest(parsed, { threadId: "thr_decision" });
 
   assert.match(output, /^CODEX DECISION NEEDED/);
   assert.match(output, /Blocker: Two valid migration strategies/);
@@ -82,6 +115,8 @@ test("renderDecisionRequest formats a decision request for display", () => {
   assert.match(output, /B: Rename-and-drop migration/);
   assert.match(output, /Recommended: A/);
   assert.match(output, /\/codex:execute --resume "Decision:/);
+  assert.match(output, /Codex session ID: thr_decision/);
+  assert.match(output, /Resume in Codex: codex resume thr_decision/);
 });
 
 test("renderDecisionRequest handles empty evidence and options gracefully", () => {
@@ -99,4 +134,5 @@ test("renderDecisionRequest handles empty evidence and options gracefully", () =
   assert.doesNotMatch(output, /Evidence:/);
   assert.doesNotMatch(output, /Options:/);
   assert.doesNotMatch(output, /Recommended:/);
+  assert.doesNotMatch(output, /Codex session ID:/);
 });

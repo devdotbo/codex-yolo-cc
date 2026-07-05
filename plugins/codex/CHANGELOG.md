@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.3.0-yolo
+
+Fork hardening release for Codex execute from subagents.
+
+- Added the `codex-companion` PATH launcher so plain subagent Bash can invoke the companion without relying on `${CLAUDE_PLUGIN_ROOT}`
+- Fixed `/codex:result <job-id>` for queued/running jobs so existing active jobs report "still running" instead of "No job found"
+- Hardened `codex:codex-execute` against silent fake-success responses by requiring every delegated request to forward to the companion `task` runtime
+- Added foreground proof-of-Codex markers for task output and `CODEX DECISION NEEDED` output: `Codex session ID:` plus the matching `codex resume <thread-id>` command
+- Corrected `/codex:execute` docs to describe the real main-context control model: subagents can start Codex work, while the main context owns status/result/cancel/transfer, resume routing, and decision prompts
+- Updated the `codex-cli-runtime` invocation contract with the context-independent launcher and the always-forward rule
+- Added a `codex-explain` section documenting shared subagent execution data, main-context control, and marker-based verification
+- Added a fail-closed consumer rule for the proof-of-Codex marker: `/codex:execute` and `codex-result-handling` treat any `codex:codex-execute` response without the `Codex session ID:` line as a non-run or failed run, never as a Codex answer
+- Made the test suite hermetic to live-session env injection: `tests/helpers.mjs` strips `CLAUDE_PLUGIN_DATA` and the `CODEX_COMPANION_*` runtime vars at startup, so `npm test` passes from inside a running Claude Code session
+- Bumped manifest/version metadata across `package.json`, `package-lock.json`, `plugins/codex/.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` (1.2.0-yolo -> 1.3.0-yolo)
+- Known issues: crashed sessions can still leave orphaned `cxc-*` broker temp directories behind; cleanup is tracked for a later release
+
 ## 1.2.0-yolo
 
 Fork release. Default model bumped to GPT 5.5; legacy 5.4 stays selectable.

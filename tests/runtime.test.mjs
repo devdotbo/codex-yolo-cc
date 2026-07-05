@@ -16,6 +16,27 @@ const SCRIPT = path.join(PLUGIN_ROOT, "scripts", "codex-companion.mjs");
 const STOP_HOOK = path.join(PLUGIN_ROOT, "scripts", "stop-review-gate-hook.mjs");
 const SESSION_HOOK = path.join(PLUGIN_ROOT, "scripts", "session-lifecycle-hook.mjs");
 
+function assertHasCodexSessionMarker(output) {
+  assert.match(output, /Codex session ID: thr_[a-z0-9]+/i);
+  assert.match(output, /Resume in Codex: codex resume thr_[a-z0-9]+/i);
+}
+
+function makeGitWorkspace() {
+  const repo = makeTempDir();
+  initGitRepo(repo);
+  return repo;
+}
+
+function withoutCompanionRuntime(env) {
+  const isolated = { ...env };
+  delete isolated.CODEX_COMPANION_APP_SERVER_ENDPOINT;
+  delete isolated.CODEX_COMPANION_APP_SERVER_LOG_FILE;
+  delete isolated.CODEX_COMPANION_APP_SERVER_PID_FILE;
+  delete isolated.CODEX_COMPANION_SESSION_ID;
+  delete isolated.CODEX_COMPANION_TRANSCRIPT_PATH;
+  return isolated;
+}
+
 async function waitFor(predicate, { timeoutMs = 5000, intervalMs = 50 } = {}) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
@@ -29,11 +50,12 @@ async function waitFor(predicate, { timeoutMs = 5000, intervalMs = 50 } = {}) {
 }
 
 test("setup reports ready when fake codex is installed and authenticated", () => {
+  const repo = makeGitWorkspace();
   const binDir = makeTempDir();
   installFakeCodex(binDir);
 
   const result = run("node", [SCRIPT, "setup", "--json"], {
-    cwd: ROOT,
+    cwd: repo,
     env: buildEnv(binDir)
   });
 
@@ -44,17 +66,31 @@ test("setup reports ready when fake codex is installed and authenticated", () =>
   assert.equal(payload.sessionRuntime.mode, "direct");
 });
 
+test("codex-companion launcher self-locates from PATH", () => {
+  const repo = makeGitWorkspace();
+
+  const result = run("codex-companion", ["status", "--json"], {
+    cwd: repo,
+    env: buildEnv(path.join(PLUGIN_ROOT, "bin"))
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(fs.realpathSync(payload.workspaceRoot), fs.realpathSync(repo));
+});
+
 test("setup is ready without npm when Codex is already installed and authenticated", () => {
+  const repo = makeGitWorkspace();
   const binDir = makeTempDir();
   installFakeCodex(binDir);
   fs.symlinkSync(process.execPath, path.join(binDir, "node"));
 
   const result = run("node", [SCRIPT, "setup", "--json"], {
-    cwd: ROOT,
-    env: {
+    cwd: repo,
+    env: withoutCompanionRuntime({
       ...process.env,
       PATH: binDir
-    }
+    })
   });
 
   assert.equal(result.status, 0, result.stderr);
@@ -66,11 +102,12 @@ test("setup is ready without npm when Codex is already installed and authenticat
 });
 
 test("setup trusts app-server API key auth even when login status alone would fail", () => {
+  const repo = makeGitWorkspace();
   const binDir = makeTempDir();
   installFakeCodex(binDir, "api-key-account-only");
 
   const result = run("node", [SCRIPT, "setup", "--json"], {
-    cwd: ROOT,
+    cwd: repo,
     env: buildEnv(binDir)
   });
 
@@ -84,11 +121,12 @@ test("setup trusts app-server API key auth even when login status alone would fa
 });
 
 test("setup is ready when the active provider does not require OpenAI login", () => {
+  const repo = makeGitWorkspace();
   const binDir = makeTempDir();
   installFakeCodex(binDir, "provider-no-auth");
 
   const result = run("node", [SCRIPT, "setup", "--json"], {
-    cwd: ROOT,
+    cwd: repo,
     env: buildEnv(binDir)
   });
 
@@ -102,11 +140,12 @@ test("setup is ready when the active provider does not require OpenAI login", ()
 });
 
 test("setup treats custom providers with app-server-ready config as ready", () => {
+  const repo = makeGitWorkspace();
   const binDir = makeTempDir();
   installFakeCodex(binDir, "env-key-provider");
 
   const result = run("node", [SCRIPT, "setup", "--json"], {
-    cwd: ROOT,
+    cwd: repo,
     env: buildEnv(binDir)
   });
 
@@ -120,11 +159,12 @@ test("setup treats custom providers with app-server-ready config as ready", () =
 });
 
 test("setup reports not ready when app-server config read fails", () => {
+  const repo = makeGitWorkspace();
   const binDir = makeTempDir();
   installFakeCodex(binDir, "config-read-fails");
 
   const result = run("node", [SCRIPT, "setup", "--json"], {
-    cwd: ROOT,
+    cwd: repo,
     env: buildEnv(binDir)
   });
 
@@ -173,6 +213,7 @@ test("task runs when the active provider does not require OpenAI login", () => {
 
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Handled the requested task/);
+  assertHasCodexSessionMarker(result.stdout);
 });
 
 test("task runs without auth preflight so Codex can refresh an expired session", () => {
@@ -191,6 +232,7 @@ test("task runs without auth preflight so Codex can refresh an expired session",
 
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Handled the requested task/);
+  assertHasCodexSessionMarker(result.stdout);
 });
 
 test("transfer delegates the current Claude session directly to native import", () => {
@@ -500,7 +542,8 @@ test("task --resume-last resumes the latest persisted task thread", () => {
   });
 
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stdout, "Resumed the prior run.\nFollow-up prompt accepted.\n");
+  assert.match(result.stdout, /^Resumed the prior run\.\nFollow-up prompt accepted\.\n/);
+  assertHasCodexSessionMarker(result.stdout);
 });
 
 test("task-resume-candidate returns the latest execute thread from the current session", () => {
@@ -713,7 +756,8 @@ test("write task output focuses on the Codex result without generic follow-up hi
   });
 
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stdout, "Handled the requested task.\nTask prompt accepted.\n");
+  assert.match(result.stdout, /^Handled the requested task\.\nTask prompt accepted\.\n/);
+  assertHasCodexSessionMarker(result.stdout);
 });
 
 test("task --resume acts like --resume-last without leaking the flag into the prompt", () => {
@@ -918,7 +962,8 @@ test("task waits for the main thread to complete before returning the final resu
   });
 
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stdout, "Handled the requested task.\nTask prompt accepted.\n");
+  assert.match(result.stdout, /^Handled the requested task\.\nTask prompt accepted\.\n/);
+  assertHasCodexSessionMarker(result.stdout);
 });
 
 test("task ignores later subagent messages when choosing the final returned output", () => {
@@ -936,7 +981,8 @@ test("task ignores later subagent messages when choosing the final returned outp
   });
 
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stdout, "Handled the requested task.\nTask prompt accepted.\n");
+  assert.match(result.stdout, /^Handled the requested task\.\nTask prompt accepted\.\n/);
+  assertHasCodexSessionMarker(result.stdout);
 });
 
 test("task can finish after subagent work even if the parent turn/completed event is missing", () => {
@@ -954,7 +1000,8 @@ test("task can finish after subagent work even if the parent turn/completed even
   });
 
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stdout, "Handled the requested task.\nTask prompt accepted.\n");
+  assert.match(result.stdout, /^Handled the requested task\.\nTask prompt accepted\.\n/);
+  assertHasCodexSessionMarker(result.stdout);
 });
 
 test("task using the shared broker still completes when Codex spawns subagents", () => {
@@ -984,7 +1031,8 @@ test("task using the shared broker still completes when Codex spawns subagents",
   });
 
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stdout, "Handled the requested task.\nTask prompt accepted.\n");
+  assert.match(result.stdout, /^Handled the requested task\.\nTask prompt accepted\.\n/);
+  assertHasCodexSessionMarker(result.stdout);
 });
 
 test("task --background enqueues a detached worker and exposes per-job status", async () => {
@@ -1480,6 +1528,70 @@ test("result returns the stored output for the latest finished job by default", 
     result.stdout,
     "Reviewed uncommitted changes.\nNo material issues found.\n\nCodex session ID: thr_review_finished\nResume in Codex: codex resume thr_review_finished\n"
   );
+});
+
+test("result with a running job id reports that the job is still running", () => {
+  const workspace = makeTempDir();
+  const stateDir = resolveStateDir(workspace);
+  const jobsDir = path.join(stateDir, "jobs");
+  fs.mkdirSync(jobsDir, { recursive: true });
+
+  const logFile = path.join(jobsDir, "task-live.log");
+  fs.writeFileSync(logFile, "[2026-03-18T15:30:00.000Z] Starting Codex Task.\n", "utf8");
+  fs.writeFileSync(
+    path.join(jobsDir, "task-live.json"),
+    JSON.stringify(
+      {
+        id: "task-live",
+        status: "running",
+        title: "Codex Task",
+        logFile
+      },
+      null,
+      2
+    ),
+    "utf8"
+  );
+  fs.writeFileSync(
+    path.join(stateDir, "state.json"),
+    `${JSON.stringify(
+      {
+        version: 1,
+        config: { stopReviewGate: false },
+        jobs: [
+          {
+            id: "task-live",
+            status: "running",
+            title: "Codex Task",
+            jobClass: "task",
+            summary: "Investigate flaky test",
+            logFile,
+            createdAt: "2026-03-18T15:30:00.000Z",
+            startedAt: "2026-03-18T15:30:01.000Z",
+            updatedAt: "2026-03-18T15:30:02.000Z"
+          }
+        ]
+      },
+      null,
+      2
+    )}\n`,
+    "utf8"
+  );
+
+  const result = run("node", [SCRIPT, "result", "task-live"], {
+    cwd: workspace
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Job task-live is still running/);
+  assert.doesNotMatch(result.stderr, /No job found/);
+
+  const defaultResult = run("node", [SCRIPT, "result"], {
+    cwd: workspace
+  });
+
+  assert.notEqual(defaultResult.status, 0);
+  assert.match(defaultResult.stderr, /Job task-live is still running/);
 });
 
 test("result without a job id prefers the latest finished job from the current Claude session", () => {
