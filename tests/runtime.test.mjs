@@ -828,7 +828,7 @@ test("task forwards model selection and reasoning effort to app-server turn/star
   assert.equal(fakeState.lastTurnStart.effort, "low");
 });
 
-test("task defaults to gpt-5.5 when no --model flag is provided", () => {
+test("task defaults to gpt-5.6-sol when no --model flag is provided", () => {
   const repo = makeTempDir();
   const binDir = makeTempDir();
   const statePath = path.join(binDir, "fake-codex-state.json");
@@ -845,10 +845,10 @@ test("task defaults to gpt-5.5 when no --model flag is provided", () => {
 
   assert.equal(result.status, 0, result.stderr);
   const fakeState = JSON.parse(fs.readFileSync(statePath, "utf8"));
-  assert.equal(fakeState.lastTurnStart.model, "gpt-5.5");
+  assert.equal(fakeState.lastTurnStart.model, "gpt-5.6-sol");
 });
 
-test("task accepts gpt-5.5 and the mini alias", () => {
+test("task accepts the sol alias, explicit gpt-5.5, and the mini alias", () => {
   const repo = makeTempDir();
   const binDir = makeTempDir();
   const statePath = path.join(binDir, "fake-codex-state.json");
@@ -857,6 +857,22 @@ test("task accepts gpt-5.5 and the mini alias", () => {
   fs.writeFileSync(path.join(repo, "README.md"), "hello\n");
   run("git", ["add", "README.md"], { cwd: repo });
   run("git", ["commit", "-m", "init"], { cwd: repo });
+
+  const runSol = run("node", [SCRIPT, "task", "--model", "sol", "check sol alias"], {
+    cwd: repo,
+    env: buildEnv(binDir)
+  });
+  assert.equal(runSol.status, 0, runSol.stderr);
+  const solState = JSON.parse(fs.readFileSync(statePath, "utf8"));
+  assert.equal(solState.lastTurnStart.model, "gpt-5.6-sol");
+
+  const runFive = run("node", [SCRIPT, "task", "--model", "gpt-5.5", "check explicit gpt-5.5"], {
+    cwd: repo,
+    env: buildEnv(binDir)
+  });
+  assert.equal(runFive.status, 0, runFive.stderr);
+  const fiveState = JSON.parse(fs.readFileSync(statePath, "utf8"));
+  assert.equal(fiveState.lastTurnStart.model, "gpt-5.5");
 
   const runMini = run("node", [SCRIPT, "task", "--model", "mini", "check mini alias"], {
     cwd: repo,
@@ -891,6 +907,7 @@ test("task rejects an unsupported --model value with a clear error", () => {
 
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /Unsupported model "invalid-model"/);
+  assert.match(result.stderr, /gpt-5\.6-sol/);
   assert.match(result.stderr, /gpt-5\.5/);
   assert.match(result.stderr, /gpt-5\.5-mini/);
 });

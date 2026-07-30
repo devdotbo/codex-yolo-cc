@@ -21,7 +21,7 @@ Execution rules:
 - Once invoked, always forward through the companion `task` command. Do not answer from your own knowledge or fabricate a simple result, even for trivial prompts.
 - You may use the `gpt-5-5-prompting` skill to rewrite the user's request into a tighter Codex prompt before the single `task` call.
 - That prompt drafting is the only Claude-side work allowed. Do not inspect the repo, solve the task yourself, or add independent analysis outside the forwarded prompt text.
-- Model defaults to gpt-5.5 and accepts --model <model> (gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
+- Model defaults to gpt-5.6-sol and accepts --model <model> (gpt-5.6-sol, gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: sol -> gpt-5.6-sol, mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
 
 Command selection:
 - Use exactly one `task` invocation per execute handoff.

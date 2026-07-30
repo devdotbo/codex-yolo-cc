@@ -125,7 +125,7 @@ This command is read-only. It does not fix code.
 
 ### `/codex:execute`
 
-Hands a task to Codex through the `codex:codex-execute` subagent. Runs in YOLO mode (full sandbox access) with GPT 5.5 at xhigh reasoning.
+Hands a task to Codex through the `codex:codex-execute` subagent. Runs in YOLO mode (full sandbox access) with GPT 5.6 sol at xhigh reasoning.
 
 Use it when you want Codex to:
 
@@ -156,7 +156,7 @@ Ask Codex to redesign the database connection to be more resilient.
 
 **Notes:**
 
-- model defaults to GPT 5.5 (also supports gpt-5.5-mini and gpt-5.4/5.4-mini fallbacks via --model; aliases: mini, legacy, legacy-mini), effort defaults to xhigh (accepts --effort)
+- model defaults to GPT 5.6 sol (also supports gpt-5.5, gpt-5.5-mini and gpt-5.4/5.4-mini fallbacks via --model; aliases: sol, mini, legacy, legacy-mini), effort defaults to xhigh (accepts --effort)
 - sandbox runs in YOLO mode (danger-full-access) - full read/write/exec access
 - follow-up execute requests can continue the latest Codex task in the repo
 
@@ -268,7 +268,7 @@ The Codex plugin wraps the [Codex app server](https://developers.openai.com/code
 
 ### Common Configurations
 
-This fork defaults to GPT 5.5 at xhigh reasoning for all execute tasks. Model selection accepts `--model` (gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini) and effort accepts `--effort`. Web search is always enabled (`live` mode, `high` context) per-thread. You can still configure other Codex options in your `config.toml`. Requires Codex CLI >= 0.124.0 for gpt-5.5.
+This fork defaults to GPT 5.6 sol at xhigh reasoning for all execute tasks. Model selection accepts `--model` (gpt-5.6-sol, gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: sol -> gpt-5.6-sol, mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini) and effort accepts `--effort`. Web search is always enabled (`live` mode, `high` context) per-thread. You can still configure other Codex options in your `config.toml`. Requires Codex CLI >= 0.124.0 for gpt-5.5, and a Codex CLI build that ships gpt-5.6-sol for the default model.
 
 This fork starts `codex app-server` through the local `codex-lb` provider by default (`http://127.0.0.1:2455/backend-api/codex`). Set `CODEX_PLUGIN_DISABLE_LB=1` to use the normal Codex provider for a session, or set `CODEX_PLUGIN_LB_BASE_URL` to point the plugin at a different load balancer endpoint.
 

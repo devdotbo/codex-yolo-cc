@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Default model: gpt-5.5 → gpt-5.6-sol (companion runtime, lib/codex.mjs thread/resume/turn defaults, stop-review-gate hook)
+- Allowed models: gpt-5.6-sol, gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini
+- Aliases: `sol` → gpt-5.6-sol (new), `mini` → gpt-5.5-mini, `legacy` → gpt-5.4, `legacy-mini` → gpt-5.4-mini
+- Docs/manifest descriptions updated to "GPT 5.6 sol xhigh"; gpt-5.5 stays selectable via `--model`
+- Tests: default-model assertion moved to gpt-5.6-sol; added `sol` alias and explicit `--model gpt-5.5` coverage
+
 ## 1.3.0-yolo
 
 Fork hardening release for Codex execute from subagents.

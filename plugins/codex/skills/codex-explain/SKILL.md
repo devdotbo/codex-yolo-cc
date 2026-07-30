@@ -154,11 +154,12 @@ The rest are user-typed slash commands.
 
 ## Models and effort
 
-- Models: `gpt-5.5` (default), `gpt-5.5-mini`, `gpt-5.4`, `gpt-5.4-mini`.
-- Aliases: `mini` = gpt-5.5-mini, `legacy` = gpt-5.4, `legacy-mini` = gpt-5.4-mini.
+- Models: `gpt-5.6-sol` (default), `gpt-5.5`, `gpt-5.5-mini`, `gpt-5.4`, `gpt-5.4-mini`.
+- Aliases: `sol` = gpt-5.6-sol, `mini` = gpt-5.5-mini, `legacy` = gpt-5.4, `legacy-mini` = gpt-5.4-mini.
 - Effort: `none`, `minimal`, `low`, `medium`, `high`, `xhigh`. Default `xhigh`.
-- gpt-5.5 needs Codex CLI >= 0.124.0. gpt-5.5-mini stays in the allowlist but may
-  not be entitled on all ChatGPT accounts.
+- gpt-5.6-sol needs a Codex CLI build that ships the model; gpt-5.5 needs Codex CLI
+  >= 0.124.0. gpt-5.5-mini stays in the allowlist but may not be entitled on all
+  ChatGPT accounts.
 
 ## Stop-review gate (opt-in, off by default)
 

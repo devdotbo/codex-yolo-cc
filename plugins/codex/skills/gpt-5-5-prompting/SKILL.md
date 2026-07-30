@@ -61,9 +61,10 @@ Common failure modes to avoid live in [references/codex-prompt-antipatterns.md](
 
 | Model | Strengths | Prompt strategy |
 |-------|-----------|-----------------|
-| gpt-5.5 | Strongest reasoning, large context, complex multi-step tasks, nuanced code review | Full prompt recipes with all blocks. Use completeness_contract and verification_loop. |
+| gpt-5.6-sol (default) | Strongest reasoning, large context, complex multi-step tasks, nuanced code review | Full prompt recipes with all blocks. Use completeness_contract and verification_loop. |
+| gpt-5.5 | Strong reasoning fallback when 5.6-sol is unavailable for the account | Same block mix as gpt-5.6-sol. |
 | gpt-5.5-mini | Fast, cost-effective, focused single-step tasks | Simplified prompts. Prefer compact_output_contract. Skip dig_deeper_nudge. Keep task scope narrow. |
-| gpt-5.4 | Legacy fallback when 5.5 is unavailable for the account | Same block mix as gpt-5.5. |
+| gpt-5.4 | Legacy fallback when the newer models are unavailable for the account | Same block mix as gpt-5.6-sol. |
 | gpt-5.4-mini | Legacy mini fallback | Same simplified strategy as gpt-5.5-mini. |
 
 When the selected model is a mini variant (gpt-5.5-mini or gpt-5.4-mini):

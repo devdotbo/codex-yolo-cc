@@ -1,5 +1,5 @@
 ---
-description: Delegate execution to Codex (default GPT 5.5 xhigh, YOLO mode)
+description: Delegate execution to Codex (default GPT 5.6 sol xhigh, YOLO mode)
 argument-hint: "[--background|--wait] [--resume|--fresh] [--model <model>] [--effort <level>] [what Codex should execute or investigate]"
 allowed-tools: Bash(node:*), AskUserQuestion, Agent
 ---
@@ -42,7 +42,7 @@ Operating rules:
 - Fail closed on the proof-of-Codex marker: a genuine completed run ends with a `Codex session ID: <thread-id>` line. If the subagent's response is empty or lacks that line, do not present it as Codex output. Report that no verified Codex run happened (or that the run failed before a thread was ready), point to `/codex:status`, and stop.
 - Do not paraphrase, summarize, rewrite, or add commentary before or after it.
 - Do not ask the subagent to inspect files, monitor progress, poll `/codex:status`, fetch `/codex:result`, call `/codex:cancel`, summarize output, or do follow-up work of its own.
-- Model defaults to gpt-5.5 and accepts --model <model> (gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
+- Model defaults to gpt-5.6-sol and accepts --model <model> (gpt-5.6-sol, gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: sol -> gpt-5.6-sol, mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini). Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
 - Leave `--resume` and `--fresh` in the forwarded request. The subagent handles that routing when it builds the `task` command.
 - If the helper reports that Codex is missing or unauthenticated, stop and tell the user to run `/codex:setup`.
 - If the user did not supply a request, ask what Codex should execute or investigate.
