@@ -1,6 +1,6 @@
 ---
-description: Delegate execution to Codex (default GPT 5.6 sol xhigh, YOLO mode)
-argument-hint: "[--background|--wait] [--resume|--fresh] [--model <model>] [--effort <level>] [what Codex should execute or investigate]"
+description: Delegate execution to Codex (GPT 5.6 sol xhigh, YOLO mode)
+argument-hint: "[--background|--wait] [--resume|--fresh] [--model gpt-5.6-sol] [--effort <level>] [what Codex should execute or investigate]"
 allowed-tools: Bash(node:*), AskUserQuestion, Agent
 ---
 
