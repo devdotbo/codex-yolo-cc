@@ -2,11 +2,12 @@
 
 ## Unreleased
 
-- Default model: gpt-5.5 → gpt-5.6-sol (companion runtime, lib/codex.mjs thread/resume/turn defaults, stop-review-gate hook)
-- Allowed models: gpt-5.6-sol, gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini
-- Aliases: `sol` → gpt-5.6-sol (new), `mini` → gpt-5.5-mini, `legacy` → gpt-5.4, `legacy-mini` → gpt-5.4-mini
-- Docs/manifest descriptions updated to "GPT 5.6 sol xhigh"; gpt-5.5 stays selectable via `--model`
-- Tests: default-model assertion moved to gpt-5.6-sol; added `sol` alias and explicit `--model gpt-5.5` coverage
+- gpt-5.6-sol is now the only supported model (companion runtime, lib/codex.mjs thread/resume/turn defaults, stop-review-gate hook)
+- Allowed models: gpt-5.6-sol only; gpt-5.5, gpt-5.5-mini, gpt-5.4 and gpt-5.4-mini were removed from the allowlist and are rejected with the "Unsupported model" error
+- Aliases: `sol` → gpt-5.6-sol; `mini`, `legacy` and `legacy-mini` removed
+- Docs/manifest descriptions updated to "GPT 5.6 sol xhigh" and no longer list alternative models; `--effort` behavior is unchanged
+- Prompting skill guidance is single-model; the Mini recipes stay as compact templates for small, bounded asks
+- Tests: default and explicit `--model gpt-5.6-sol` coverage, `sol` alias coverage, and rejection coverage for every retired model name and alias
 
 ## 1.3.0-yolo
 

@@ -4,12 +4,12 @@ Custom fork of [`openai/codex-plugin-cc`](https://github.com/openai/codex-plugin
 
 ## What Changed
 
-- Model: defaults to GPT 5.6 sol, accepts `--model <model>` override (gpt-5.6-sol, gpt-5.5, gpt-5.5-mini, gpt-5.4, gpt-5.4-mini; aliases: sol -> gpt-5.6-sol, mini -> gpt-5.5-mini, legacy -> gpt-5.4, legacy-mini -> gpt-5.4-mini)
+- Model: GPT 5.6 sol only; `--model` accepts just `gpt-5.6-sol` (alias `sol`) and rejects every other value
 - Effort: defaults to xhigh, accepts `--effort <level>` override (medium, high, xhigh, etc.)
 - Sandbox: danger-full-access (YOLO mode) for all execute tasks, read-only for reviews
 - Web search: always live with high context (hardcoded per-thread via app-server config)
 - `/codex:rescue` replaced with `/codex:execute`
-- Requires Codex CLI >= 0.124.0 for gpt-5.5 support (gpt-5.6-sol needs a Codex CLI build that ships the model)
+- Requires a Codex CLI build that ships gpt-5.6-sol
 
 
 ## Local Setup Required

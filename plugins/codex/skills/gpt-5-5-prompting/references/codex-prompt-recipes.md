@@ -1,6 +1,6 @@
 # Codex Prompt Recipes
 
-Use these as starting templates for Codex task prompts or other Codex/GPT-5.5 prompt construction.
+Use these as starting templates for Codex task prompts or other Codex/gpt-5.6-sol prompt construction.
 Copy the smallest recipe that fits the task, then trim anything you do not need.
 In `codex:codex-execute`, run diagnosis and fix-oriented recipes in write mode by default unless the user explicitly asked for read-only behavior.
 
@@ -128,7 +128,7 @@ Prefer primary sources.
 
 ```xml
 <task>
-Diagnose why this existing prompt is underperforming and propose the smallest high-leverage changes to improve it for Codex or GPT-5.5.
+Diagnose why this existing prompt is underperforming and propose the smallest high-leverage changes to improve it for Codex or gpt-5.6-sol.
 </task>
 
 <structured_output_contract>
@@ -151,7 +151,7 @@ Before finalizing, make sure the revised prompt resolves the cited failure modes
 
 ## Mini Recipes
 
-Simplified variants for mini models (gpt-5.5-mini or gpt-5.4-mini). Use fewer blocks and shorter contracts.
+Simplified variants for small, bounded asks. Use fewer blocks and shorter contracts.
 
 ### Mini: Quick Lookup
 

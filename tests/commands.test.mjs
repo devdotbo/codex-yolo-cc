@@ -107,7 +107,7 @@ test("execute command absorbs continue semantics", () => {
   assert.match(execute, /run the `codex:codex-execute` subagent in the background/i);
   assert.match(execute, /default to foreground/i);
   assert.match(execute, /Do not forward them to `task`/i);
-  assert.match(execute, /Model defaults to gpt-5\.6-sol and accepts --model <model>/i);
+  assert.match(execute, /Model is fixed to gpt-5\.6-sol, the only supported --model value/i);
   assert.match(execute, /If the request includes `--resume`, do not ask whether to continue/i);
   assert.match(execute, /If the request includes `--fresh`, do not ask whether to continue/i);
   assert.match(execute, /If the user chooses continue, add `--resume`/i);
@@ -125,7 +125,7 @@ test("execute command absorbs continue semantics", () => {
   assert.match(agent, /MUST NOT answer from your own knowledge/i);
   assert.match(agent, /Do not inspect the repository, read files, grep, monitor progress, poll status, fetch results, cancel jobs, summarize output, or do any follow-up work of your own/i);
   assert.match(agent, /Do not call `review`, `adversarial-review`, `status`, `result`, or `cancel`/i);
-  assert.match(agent, /Model defaults to gpt-5\.6-sol and accepts --model <model>/i);
+  assert.match(agent, /Model is fixed to gpt-5\.6-sol, the only supported --model value/i);
   assert.match(agent, /Return the stdout of the `codex-companion` command exactly as-is/i);
   assert.match(agent, /If the Bash call fails or Codex cannot be invoked, return nothing/i);
   assert.match(agent, /gpt-5-5-prompting/);
@@ -139,13 +139,13 @@ test("execute command absorbs continue semantics", () => {
   assert.match(runtimeSkill, /Do not call `setup`, `review`, `adversarial-review`, `status`, `result`, or `cancel`/i);
   assert.match(runtimeSkill, /use the `gpt-5-5-prompting` skill to rewrite the user's request into a tighter Codex prompt/i);
   assert.match(runtimeSkill, /That prompt drafting is the only Claude-side work allowed/i);
-  assert.match(runtimeSkill, /Model defaults to gpt-5\.6-sol and accepts --model <model>/i);
+  assert.match(runtimeSkill, /Model is fixed to gpt-5\.6-sol, the only supported --model value/i);
   assert.match(runtimeSkill, /If the forwarded request includes `--background` or `--wait`, treat that as Claude-side execution control only/i);
   assert.match(runtimeSkill, /Strip it before calling `task`/i);
   assert.match(runtimeSkill, /Do not inspect the repository, read files, grep, monitor progress, poll status, fetch results, cancel jobs, summarize output, or do any follow-up work of your own/i);
   assert.match(runtimeSkill, /If the Bash call fails or Codex cannot be invoked, return nothing/i);
   assert.match(readme, /`codex:codex-execute` subagent/i);
-  assert.match(readme, /model defaults to GPT 5\.6 sol \(also supports gpt-5\.5, gpt-5\.5-mini and gpt-5\.4\/5\.4-mini fallbacks via --model/i);
+  assert.match(readme, /model is fixed to GPT 5\.6 sol; `gpt-5\.6-sol` \(alias `sol`\) is the only accepted --model value/i);
   assert.match(readme, /sandbox runs in YOLO mode/i);
   assert.match(readme, /continue a previous Codex task/i);
   assert.match(readme, /### `\/codex:setup`/);
@@ -245,14 +245,16 @@ test("prompting skill references confidence reporting contract", () => {
 test("prompting skill includes model-specific prompt guidance", () => {
   const promptingSkill = read("skills/gpt-5-5-prompting/SKILL.md");
   const promptRecipes = read("skills/gpt-5-5-prompting/references/codex-prompt-recipes.md");
-  assert.match(promptingSkill, /gpt-5\.5-mini/);
+  assert.match(promptingSkill, /gpt-5\.6-sol/);
+  assert.doesNotMatch(promptingSkill, /gpt-5\.5|gpt-5\.4/);
   assert.match(promptingSkill, /Model-Specific Prompt Guidance/);
   assert.match(promptRecipes, /Mini Recipes/);
   assert.match(promptRecipes, /Mini: Quick Lookup/);
   assert.match(promptRecipes, /Mini: Targeted Fix/);
 });
 
-test("execute agent references model-aware prompting for mini", () => {
+test("execute agent references the simplified recipes and no retired models", () => {
   const agent = read("agents/codex-execute.md");
-  assert.match(agent, /mini variant.*simplified prompt recipes/i);
+  assert.match(agent, /bounded asks.*simplified prompt recipes/i);
+  assert.doesNotMatch(agent, /gpt-5\.5|gpt-5\.4/);
 });

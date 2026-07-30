@@ -1,12 +1,12 @@
 ---
 name: gpt-5-5-prompting
-description: Internal guidance for composing Codex and GPT-5.5 prompts for coding, review, diagnosis, and research tasks inside the Codex Claude Code plugin
+description: Internal guidance for composing Codex and GPT-5.6-sol prompts for coding, review, diagnosis, and research tasks inside the Codex Claude Code plugin
 user-invocable: false
 ---
 
-# GPT-5.5 Prompting
+# Codex Prompting (gpt-5.6-sol)
 
-Use this skill when `codex:codex-execute` needs to ask Codex or another GPT-5.5-based workflow for help. The same recipes still apply to GPT-5.4 fallback runs.
+Use this skill when `codex:codex-execute` needs to ask Codex for help. Codex runs gpt-5.6-sol, the only supported model.
 
 Prompt Codex like an operator, not a collaborator. Keep prompts compact and block-structured with XML tags. State the task, the output contract, the follow-through defaults, and the small set of extra constraints that matter.
 
@@ -61,13 +61,10 @@ Common failure modes to avoid live in [references/codex-prompt-antipatterns.md](
 
 | Model | Strengths | Prompt strategy |
 |-------|-----------|-----------------|
-| gpt-5.6-sol (default) | Strongest reasoning, large context, complex multi-step tasks, nuanced code review | Full prompt recipes with all blocks. Use completeness_contract and verification_loop. |
-| gpt-5.5 | Strong reasoning fallback when 5.6-sol is unavailable for the account | Same block mix as gpt-5.6-sol. |
-| gpt-5.5-mini | Fast, cost-effective, focused single-step tasks | Simplified prompts. Prefer compact_output_contract. Skip dig_deeper_nudge. Keep task scope narrow. |
-| gpt-5.4 | Legacy fallback when the newer models are unavailable for the account | Same block mix as gpt-5.6-sol. |
-| gpt-5.4-mini | Legacy mini fallback | Same simplified strategy as gpt-5.5-mini. |
+| gpt-5.6-sol (the only supported model) | Strongest reasoning, large context, complex multi-step tasks, nuanced code review | Full prompt recipes with all blocks. Use completeness_contract and verification_loop. |
 
-When the selected model is a mini variant (gpt-5.5-mini or gpt-5.4-mini):
+For small, bounded asks (quick lookups, single-file fixes), use the simplified
+Mini recipes from [references/codex-prompt-recipes.md](references/codex-prompt-recipes.md):
 - Prefer one clear, bounded task over multi-step orchestration
 - Use compact_output_contract instead of structured_output_contract
 - Skip verification_loop for simple lookups and file searches
