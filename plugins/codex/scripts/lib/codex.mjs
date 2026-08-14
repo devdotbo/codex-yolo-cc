@@ -1038,8 +1038,7 @@ export async function runAppServerReview(cwd, options = {}) {
     const sourceThreadId = thread.thread.id;
     await validateReasoningSelection(client, {
       model: options.model ?? thread.model,
-      effort: options.effort ?? thread.reasoningEffort,
-      modelProvider: thread.modelProvider
+      effort: options.effort ?? thread.reasoningEffort
     });
     emitProgress(options.onProgress, `Thread ready (${sourceThreadId}).`, "starting", {
       threadId: sourceThreadId
@@ -1160,8 +1159,7 @@ export async function runAppServerTurn(cwd, options = {}) {
 
     await validateReasoningSelection(client, {
       model: options.model ?? threadSelection.model,
-      effort: options.effort ?? threadSelection.reasoningEffort,
-      modelProvider: threadSelection.modelProvider
+      effort: options.effort ?? threadSelection.reasoningEffort
     });
 
     emitProgress(options.onProgress, `Thread ready (${threadId}).`, "starting", {

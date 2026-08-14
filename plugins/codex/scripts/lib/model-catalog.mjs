@@ -1,12 +1,10 @@
 /**
  * Reasoning-effort validation against the app-server model catalog.
  *
- * Note for this fork: the app-server is spawned with `model_provider=codex-lb`
- * unless `CODEX_PLUGIN_DISABLE_LB` is set (see lib/app-server.mjs). Validation
- * intentionally no-ops for any provider other than `openai`, so under the
- * default load-balancer provider these checks stay inert and never block a run.
- * They become active when the plugin runs against the plain OpenAI provider.
- * Older CLIs without `model/list` (RPC error -32601) also degrade to a no-op.
+ * Validation always runs when an effort is selected: the requested model/effort
+ * pair is checked against the catalog the app-server reports. Older CLIs without
+ * `model/list` (RPC error -32601) degrade to a no-op, and a model the catalog
+ * does not list is left alone instead of being rejected.
  */
 
 function isUnsupportedMethodError(error) {
@@ -51,8 +49,7 @@ function supportedEfforts(model) {
 export async function validateReasoningSelection(client, selection = {}) {
   const modelName = String(selection.model ?? "").trim();
   const effort = String(selection.effort ?? "").trim().toLowerCase();
-  const provider = String(selection.modelProvider ?? "").trim().toLowerCase();
-  if (!effort || provider !== "openai") {
+  if (!effort) {
     return;
   }
 
@@ -97,7 +94,6 @@ export async function validateExplicitReasoningSelection(client, cwd, selection 
 
   await validateReasoningSelection(client, {
     model: selection.model ?? config.model,
-    effort: selection.effort ?? config.model_reasoning_effort,
-    modelProvider: config.model_provider ?? "openai"
+    effort: selection.effort ?? config.model_reasoning_effort
   });
 }

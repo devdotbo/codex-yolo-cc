@@ -9,6 +9,8 @@
 - Prompting skill guidance is single-model; the Mini recipes stay as compact templates for small, bounded asks
 - Tests: default and explicit `--model gpt-5.6-sol` coverage, `sol` alias coverage, and rejection coverage for every retired model name and alias
 - `--effort max` is now accepted (default stays `xhigh`); explicit model/effort pairs are validated against the app-server model catalog, which no-ops on older CLIs and on non-openai providers such as the default `codex-lb`
+- Load-balancer support removed: the app-server is always started with the plain provider from the user's own Codex config, with no `-c` overrides; the `CODEX_PLUGIN_DISABLE_LB` and `CODEX_PLUGIN_LB_BASE_URL` environment variables are gone and no longer read anywhere
+- Model catalog validation now runs unconditionally instead of no-opping for non-openai providers; the `modelProvider` field was dropped from the validation input, and unknown models plus older CLIs without `model/list` still pass through untouched
 - Skill renamed: `gpt-5-5-prompting` → `codex-prompting`, with references updated in the execute agent, the CLI runtime skill, and the tests; the model-specific table was replaced by gpt-5.6-sol prompting notes, `confidence_report` is now part of the block-selection guidance, and the recipes no longer claim a selectable write mode
 
 ## 1.3.0-yolo

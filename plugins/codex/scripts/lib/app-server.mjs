@@ -22,18 +22,6 @@ const PLUGIN_MANIFEST = JSON.parse(fs.readFileSync(PLUGIN_MANIFEST_URL, "utf8"))
 export const BROKER_ENDPOINT_ENV = "CODEX_COMPANION_APP_SERVER_ENDPOINT";
 export const BROKER_BUSY_RPC_CODE = -32001;
 
-const CODEX_LB_DISABLED_ENV = "CODEX_PLUGIN_DISABLE_LB";
-const CODEX_LB_BASE_URL_ENV = "CODEX_PLUGIN_LB_BASE_URL";
-const DEFAULT_CODEX_LB_BASE_URL = "http://127.0.0.1:2455/backend-api/codex";
-const CODEX_LB_CONFIG = {
-  model_reasoning_summary_format: "experimental",
-  model_provider: "codex-lb",
-  "model_providers.codex-lb.name": "openai",
-  "model_providers.codex-lb.wire_api": "responses",
-  "model_providers.codex-lb.supports_websockets": true,
-  "model_providers.codex-lb.requires_openai_auth": true
-};
-
 /** @type {ClientInfo} */
 const DEFAULT_CLIENT_INFO = {
   title: "Codex Plugin",
@@ -66,30 +54,12 @@ function createProtocolError(message, data) {
   return error;
 }
 
-function isTruthyEnv(value) {
-  return ["1", "true", "yes", "on"].includes(String(value ?? "").trim().toLowerCase());
-}
-
-function formatConfigValue(value) {
-  return typeof value === "boolean" ? String(value) : JSON.stringify(value);
-}
-
-function buildConfigArgs(config) {
-  return Object.entries(config).flatMap(([key, value]) => ["-c", `${key}=${formatConfigValue(value)}`]);
-}
-
-export function buildCodexAppServerArgs(env = process.env) {
-  if (isTruthyEnv(env[CODEX_LB_DISABLED_ENV])) {
-    return ["app-server"];
-  }
-
-  return [
-    "app-server",
-    ...buildConfigArgs({
-      ...CODEX_LB_CONFIG,
-      "model_providers.codex-lb.base_url": env[CODEX_LB_BASE_URL_ENV] || DEFAULT_CODEX_LB_BASE_URL
-    })
-  ];
+/**
+ * The app-server is always started with the plain Codex provider configured in
+ * the user's own Codex config; the plugin injects no provider overrides.
+ */
+export function buildCodexAppServerArgs() {
+  return ["app-server"];
 }
 
 class AppServerClientBase {
@@ -226,7 +196,7 @@ class SpawnedCodexAppServerClient extends AppServerClientBase {
 
   async initialize() {
     const env = this.options.env ?? process.env;
-    this.proc = spawn("codex", buildCodexAppServerArgs(env), {
+    this.proc = spawn("codex", buildCodexAppServerArgs(), {
       cwd: this.cwd,
       env,
       stdio: ["pipe", "pipe", "pipe"],

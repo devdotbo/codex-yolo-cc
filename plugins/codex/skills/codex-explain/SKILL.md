@@ -158,9 +158,9 @@ The rest are user-typed slash commands.
   value; every other value is rejected with an "Unsupported model" error.
 - Alias: `sol` = gpt-5.6-sol.
 - Effort: `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, `max`. Default `xhigh`.
-  When the app-server runs against the plain `openai` provider, the requested
-  model/effort pair is validated against its model catalog; under the default
-  `codex-lb` provider that check is a no-op.
+  The requested model/effort pair is always validated against the app-server
+  model catalog; on older CLIs without `model/list` that check degrades to a
+  no-op.
 - gpt-5.6-sol needs a Codex CLI build that ships the model.
 
 ## Stop-review gate (opt-in, off by default)

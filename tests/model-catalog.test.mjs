@@ -29,13 +29,11 @@ test("catalog accepts max for models that support it", async () => {
 
   await validateReasoningSelection(client, {
     model: "gpt-5.6-sol",
-    effort: "max",
-    modelProvider: "openai"
+    effort: "max"
   });
   await validateReasoningSelection(client, {
     model: "gpt-5.6-terra",
-    effort: "max",
-    modelProvider: "openai"
+    effort: "max"
   });
 });
 
@@ -45,8 +43,7 @@ test("catalog rejects an unsupported effort and lists supported efforts", async 
   await assert.rejects(
     validateReasoningSelection(client, {
       model: "gpt-5.6-luna",
-      effort: "max",
-      modelProvider: "openai"
+      effort: "max"
     }),
     /Reasoning effort "max" is not supported by model "gpt-5\.6-luna".*low, medium, high, xhigh/i
   );
@@ -56,7 +53,7 @@ test("catalog validates effort against the default model when no model is select
   const client = clientWith([model("gpt-5.6-luna", ["low", "medium", "high", "xhigh"], true)]);
 
   await assert.rejects(
-    validateReasoningSelection(client, { effort: "max", modelProvider: "openai" }),
+    validateReasoningSelection(client, { effort: "max" }),
     /Reasoning effort "max" is not supported by model "gpt-5\.6-luna"/i
   );
 });
@@ -72,24 +69,40 @@ test("catalog fallback allows older CLIs without model/list", async () => {
 
   await validateReasoningSelection(client, {
     model: "gpt-5.6-sol",
-    effort: "max",
-    modelProvider: "openai"
+    effort: "max"
   });
 });
 
-test("catalog does not block custom providers or unknown models", async () => {
+test("catalog validation runs regardless of the configured provider", async () => {
   const client = clientWith([model("gpt-5.6-luna", ["high"])]);
 
-  // The fork spawns the app-server with model_provider=codex-lb by default,
-  // so validation must stay inert for any provider other than openai.
-  await validateReasoningSelection(client, {
-    model: "gpt-5.6-luna",
-    effort: "max",
-    modelProvider: "codex-lb"
-  });
+  // Validation no longer depends on a provider name: the catalog check applies
+  // to every run, so an unsupported effort is rejected here too.
+  await assert.rejects(
+    validateReasoningSelection(client, {
+      model: "gpt-5.6-luna",
+      effort: "max",
+      modelProvider: "some-custom-provider"
+    }),
+    /Reasoning effort "max" is not supported by model "gpt-5\.6-luna"/i
+  );
+});
+
+test("catalog does not block models it does not list", async () => {
+  const client = clientWith([model("gpt-5.6-luna", ["high"])]);
+
   await validateReasoningSelection(client, {
     model: "custom-model",
-    effort: "max",
-    modelProvider: "openai"
+    effort: "max"
   });
+});
+
+test("catalog stays inert when no effort is selected", async () => {
+  const client = {
+    async request() {
+      throw new Error("model/list must not be called when no effort is selected");
+    }
+  };
+
+  await validateReasoningSelection(client, { model: "gpt-5.6-sol" });
 });
