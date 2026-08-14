@@ -43,6 +43,7 @@ import { readJsonFile } from "./fs.mjs";
 import { BROKER_BUSY_RPC_CODE, BROKER_ENDPOINT_ENV, CodexAppServerClient } from "./app-server.mjs";
 import { loadBrokerSession } from "./broker-lifecycle.mjs";
 import { binaryAvailable } from "./process.mjs";
+import { validateExplicitReasoningSelection, validateReasoningSelection } from "./model-catalog.mjs";
 
 const SERVICE_NAME = "claude_code_codex_plugin";
 const TASK_THREAD_PREFIX = "Codex Companion Task";
@@ -59,6 +60,23 @@ function cleanCodexStderr(stderr) {
     .join("\n");
 }
 
+/**
+ * Thread-level config sent on every thread/start and thread/resume.
+ * Live web search is a hard requirement of this fork; the optional reasoning
+ * effort is unioned on top of it and must never replace it.
+ * @returns {Record<string, unknown>}
+ */
+function buildThreadConfig(options = {}) {
+  const config = {
+    web_search: "live",
+    tools: { web_search: { context_size: "high" } }
+  };
+  if (options.effort) {
+    config.model_reasoning_effort = options.effort;
+  }
+  return config;
+}
+
 /** @returns {ThreadStartParams} */
 function buildThreadParams(cwd, options = {}) {
   return {
@@ -68,10 +86,7 @@ function buildThreadParams(cwd, options = {}) {
     sandbox: options.sandbox ?? "read-only",
     serviceName: SERVICE_NAME,
     ephemeral: options.ephemeral ?? true,
-    config: {
-      web_search: "live",
-      tools: { web_search: { context_size: "high" } }
-    }
+    config: buildThreadConfig(options)
   };
 }
 
@@ -83,10 +98,7 @@ function buildResumeParams(threadId, cwd, options = {}) {
     model: options.model ?? "gpt-5.6-sol",
     approvalPolicy: options.approvalPolicy ?? "never",
     sandbox: options.sandbox ?? "read-only",
-    config: {
-      web_search: "live",
-      tools: { web_search: { context_size: "high" } }
-    }
+    config: buildThreadConfig(options)
   };
 }
 
@@ -1014,14 +1026,21 @@ export async function runAppServerReview(cwd, options = {}) {
   }
 
   return withAppServer(cwd, async (client) => {
+    await validateExplicitReasoningSelection(client, cwd, options);
     emitProgress(options.onProgress, "Starting Codex review thread.", "starting");
     const thread = await startThread(client, cwd, {
       model: options.model,
+      effort: options.effort,
       sandbox: "read-only",
       ephemeral: true,
       threadName: options.threadName
     });
     const sourceThreadId = thread.thread.id;
+    await validateReasoningSelection(client, {
+      model: options.model ?? thread.model,
+      effort: options.effort ?? thread.reasoningEffort,
+      modelProvider: thread.modelProvider
+    });
     emitProgress(options.onProgress, `Thread ready (${sourceThreadId}).`, "starting", {
       threadId: sourceThreadId
     });
@@ -1108,25 +1127,42 @@ export async function runAppServerTurn(cwd, options = {}) {
 
   return withAppServer(cwd, async (client) => {
     let threadId;
+    let threadSelection;
+
+    if (!options.resumeThreadId) {
+      await validateExplicitReasoningSelection(client, cwd, options, {
+        includeInherited: options.persistThread === true
+      });
+    }
 
     if (options.resumeThreadId) {
       emitProgress(options.onProgress, `Resuming thread ${options.resumeThreadId}.`, "starting");
       const response = await resumeThread(client, options.resumeThreadId, cwd, {
         model: options.model,
+        effort: options.effort,
         sandbox: options.sandbox,
         ephemeral: false
       });
       threadId = response.thread.id;
+      threadSelection = response;
     } else {
       emitProgress(options.onProgress, "Starting Codex task thread.", "starting");
       const response = await startThread(client, cwd, {
         model: options.model,
+        effort: options.effort,
         sandbox: options.sandbox,
         ephemeral: options.persistThread ? false : true,
         threadName: options.persistThread ? options.threadName : options.threadName ?? null
       });
       threadId = response.thread.id;
+      threadSelection = response;
     }
+
+    await validateReasoningSelection(client, {
+      model: options.model ?? threadSelection.model,
+      effort: options.effort ?? threadSelection.reasoningEffort,
+      modelProvider: threadSelection.modelProvider
+    });
 
     emitProgress(options.onProgress, `Thread ready (${threadId}).`, "starting", {
       threadId
