@@ -1,5 +1,5 @@
 ---
-name: gpt-5-5-prompting
+name: codex-prompting
 description: Internal guidance for composing Codex and GPT-5.6-sol prompts for coding, review, diagnosis, and research tasks inside the Codex Claude Code plugin
 user-invocable: false
 ---
@@ -26,9 +26,12 @@ Default prompt recipe:
 
 When to add blocks:
 - Coding or debugging: add `completeness_contract`, `verification_loop`, and `missing_context_gating`.
-- Review or adversarial review: add `grounding_rules`, `structured_output_contract`, and `dig_deeper_nudge`.
-- Research or recommendation tasks: add `research_mode` and `citation_rules`.
+- Review or adversarial review: add `grounding_rules`, `structured_output_contract`, `dig_deeper_nudge`, and `confidence_report`.
+- Research or recommendation tasks: add `research_mode`, `citation_rules`, and `confidence_report`.
 - Write-capable tasks: add `action_safety` so Codex stays narrow and avoids unrelated refactors.
+- Any task whose answer will drive a decision on partial evidence: add `confidence_report` so the level, basis, and risks come back with the result.
+
+Add only the blocks that materially clarify this task. A lean prompt with a few precise blocks beats a template carrying every block; unused blocks dilute the ones that matter.
 
 How to choose prompt shape:
 - Use built-in `review` or `adversarial-review` commands when the job is reviewing local git changes. Those prompts already carry the review contract.
@@ -47,7 +50,8 @@ Prompt assembly checklist:
 2. Choose the smallest output contract that still makes the answer easy to use.
 3. Decide whether Codex should keep going by default or stop for missing high-risk details.
 4. Add verification, grounding, and safety tags only where the task needs them.
-5. Remove redundant instructions before sending the prompt.
+5. Add `confidence_report` when you need to know how much to trust the answer.
+6. Remove redundant instructions before sending the prompt. Every block must earn its place; drop the ones that only restate the task.
 
 When to add the decision escalation contract:
 - Include `decision_escalation_contract` in any prompt where Codex may encounter contradictions, ambiguous requirements, overlapping file sets, or missing information that changes correctness.
@@ -57,15 +61,25 @@ Reusable blocks live in [references/prompt-blocks.md](references/prompt-blocks.m
 Concrete end-to-end templates live in [references/codex-prompt-recipes.md](references/codex-prompt-recipes.md).
 Common failure modes to avoid live in [references/codex-prompt-antipatterns.md](references/codex-prompt-antipatterns.md).
 
-## Model-Specific Prompt Guidance
+## gpt-5.6-sol notes
 
-| Model | Strengths | Prompt strategy |
-|-------|-----------|-----------------|
-| gpt-5.6-sol (the only supported model) | Strongest reasoning, large context, complex multi-step tasks, nuanced code review | Full prompt recipes with all blocks. Use completeness_contract and verification_loop. |
+Source: OpenAI's GPT-5.6 usage guide ("Using GPT-5.6", prompting best practices).
+
+- It is already concise by default. Asking it to "be brief" costs content, so
+  when you want short output, name what must survive the cut: the conclusion,
+  the supporting evidence, the caveats, and the next action.
+- It infers intent well. State the goal, the hard constraints, the approval
+  boundaries, and the success criteria once, then let it pick the routine steps.
+  Say explicitly which ambiguities should trigger a `DECISION_NEEDED`
+  escalation instead of a guess.
+- State each rule once. Repeating "ask first" or "do not mutate" across blocks
+  makes it stop for approval on steps that were already in scope.
+- Tighten scope and verification before escalating effort. The default effort is
+  `xhigh`; reserve `max` for the hardest quality-first tasks.
 
 For small, bounded asks (quick lookups, single-file fixes), use the simplified
 Mini recipes from [references/codex-prompt-recipes.md](references/codex-prompt-recipes.md):
 - Prefer one clear, bounded task over multi-step orchestration
 - Use compact_output_contract instead of structured_output_contract
 - Skip verification_loop for simple lookups and file searches
-- Keep the total prompt under ~2000 tokens when possible
+- Keep prompts lean; a few hundred tokens usually suffice for a small bounded ask

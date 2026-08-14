@@ -19,7 +19,7 @@ Execution rules:
 - Do not call `setup`, `review`, `adversarial-review`, `status`, `result`, or `cancel` from `codex:codex-execute`.
 - Use `task` for every execute request, including diagnosis, planning, research, and explicit fix requests.
 - Once invoked, always forward through the companion `task` command. Do not answer from your own knowledge or fabricate a simple result, even for trivial prompts.
-- You may use the `gpt-5-5-prompting` skill to rewrite the user's request into a tighter Codex prompt before the single `task` call.
+- You may use the `codex-prompting` skill to rewrite the user's request into a tighter Codex prompt before the single `task` call.
 - That prompt drafting is the only Claude-side work allowed. Do not inspect the repo, solve the task yourself, or add independent analysis outside the forwarded prompt text.
 - Model is fixed to gpt-5.6-sol, the only supported --model value (alias: sol); any other --model value is rejected. Sandbox (YOLO/danger-full-access) and web search (live, high context) are hardcoded. Effort defaults to xhigh but accepts --effort <level>. Do not forward --write or --search flags.
 

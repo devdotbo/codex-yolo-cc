@@ -2,7 +2,7 @@
 
 Use these as starting templates for Codex task prompts or other Codex/gpt-5.6-sol prompt construction.
 Copy the smallest recipe that fits the task, then trim anything you do not need.
-In `codex:codex-execute`, run diagnosis and fix-oriented recipes in write mode by default unless the user explicitly asked for read-only behavior.
+In `codex:codex-execute` the sandbox is hardcoded to full access (YOLO), so every recipe already runs with write permission. There is no mode to pick and no `--write` or `--search` flag to forward. If a run should stay read-only, say so inside the prompt itself, for example with an `action_safety` block that limits Codex to inspection.
 
 ## Diagnosis
 

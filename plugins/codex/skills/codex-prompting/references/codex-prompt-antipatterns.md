@@ -82,6 +82,36 @@ Better:
 - Run a separate fix prompt if needed.
 - Use a third run for docs or roadmap work.
 
+## Repeating the same rule
+
+Bad: restate approval, scope, or verification rules in several blocks so they cannot be missed.
+
+Better: state each policy once, in the block where it belongs. gpt-5.6-sol already
+honours a rule it has read once; repeating it makes Codex stop for approval on
+steps that were already in scope.
+
+## Prescribing every step
+
+Bad:
+
+```text
+First open the file, then find the handler, then add a guard, then run the tests, then...
+```
+
+Better:
+
+```xml
+<task>
+Goal: requests with a missing tenant id must fail closed instead of falling back to the default tenant.
+Hard constraints: no schema change, no new dependency.
+Success criteria: the existing suite passes and a new test covers the missing-id path.
+Required evidence: the failing-to-passing test output.
+</task>
+```
+
+Specify the goal, the hard constraints, the success criteria, and the evidence you
+need back. Let Codex choose the routine implementation steps.
+
 ## Unsupported certainty
 
 Bad:
